@@ -17,9 +17,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: apps/web/package-lock.json
-      - run: npm install --no-audit --no-fund
+      # The committed lockfile is generated on arm64 (dev) and omits the linux-x64
+      # native optional deps (lightningcss / @tailwindcss/oxide). Resolve fresh for
+      # the runner platform; the committed lockfile still drives Docker/prod builds.
+      - run: rm -f package-lock.json && npm install --no-fund
       - name: Dependency audit
         run: npm audit --audit-level=high
       - name: Typecheck
