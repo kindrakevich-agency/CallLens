@@ -80,10 +80,12 @@ export const api = {
   call(id: string): Promise<CallDetail> {
     return json(`/api/v1/calls/${id}`);
   },
-  upload(file: File, externalId?: string) {
+  upload(file: File, opts: { external_id?: string; agent_external_id?: string; channels?: string } = {}) {
     const fd = new FormData();
     fd.append("audio", file);
-    if (externalId) fd.append("external_id", externalId);
+    if (opts.external_id) fd.append("external_id", opts.external_id);
+    if (opts.agent_external_id) fd.append("agent_external_id", opts.agent_external_id);
+    if (opts.channels) fd.append("channels", opts.channels);
     return json("/api/v1/calls/upload", { method: "POST", body: fd, headers: {} });
   },
 
