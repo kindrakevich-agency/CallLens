@@ -1,1 +1,35 @@
+# --- Secrets / env ---
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# --- OS ---
 .DS_Store
+
+# --- PHP / Symfony (apps/api) ---
+/apps/api/vendor/
+/apps/api/var/
+/apps/api/.env.local
+/apps/api/config/secrets/*/*.decrypt.private.php
+/apps/api/config/jwt/*.pem
+
+# --- Node / Next.js (apps/web) ---
+node_modules/
+/apps/web/.next/
+/apps/web/out/
+/apps/web/.turbo/
+npm-debug.log*
+yarn-error.log*
+
+# --- Cube ---
+/services/cube/.env
+/services/cube/node_modules/
+
+# --- Docker / local data volumes (if bind-mounted) ---
+/.data/
+
+# --- Editors ---
+.idea/
+.vscode/
+*.swp

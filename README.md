@@ -8,6 +8,42 @@
 
 ---
 
+## Quickstart
+
+The only prerequisite is **Docker** (with Compose v2). No local PHP or Node is needed — everything runs in containers.
+
+```bash
+make init     # copies .env.example → .env and builds the images
+make up       # starts the full stack
+```
+
+Then open:
+
+| Service | URL | Notes |
+|---|---|---|
+| API health | http://localhost:8081/internal/health | `{"status":"ok"}` once the DB is up |
+| Web (landing / docs / cabinet) | http://localhost:3001 | `/`, `/docs`, `/app` |
+| Cube (analytics playground) | http://localhost:4000 | dev mode |
+| MinIO console (dev S3) | http://localhost:9001 | login `callens` / `callens-secret` |
+| Mailpit (captured email) | http://localhost:8025 | |
+
+Ports are configurable via `API_PORT` / `WEB_PORT` in `.env` (defaults avoid common 8080/3000 clashes). AI providers default to `fake`, so the whole pipeline runs deterministically with **no paid API calls**; set real keys in `.env` to switch.
+
+Common tasks (`make help` lists all):
+
+```bash
+make logs S=worker   # tail one service
+make sh              # shell into the api container
+make migrate         # run Doctrine migrations
+make test            # backend + frontend tests
+make lint            # PHPStan + php-cs-fixer + ESLint
+make down            # stop everything
+```
+
+**Services:** `api` (PHP 8.5 / Symfony 7.4 + PHP-FPM), `nginx`, `worker` + `scheduler` (Messenger), `db` (PostgreSQL 17 + pgvector), `redis`, `web` (Next.js), `cube`, plus `minio` + `mailpit` in dev. See the repo layout in §5 and the milestone plan in §21 (currently at **M0 — scaffolding**).
+
+---
+
 ## Design & HTML Prototypes
 
 Two static HTML prototypes establish the product's visual language before the Next.js app is built. They live under [`doc/html/`](doc/html/) and full-page screenshots are in [`doc/images/`](doc/images/). These are **design references**, not the production frontend.

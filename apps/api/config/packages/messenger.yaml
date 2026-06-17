@@ -1,0 +1,38 @@
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            # General async work (ingest, score, embed, finalize/delete).
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
+
+            # Dedicated transcription queue so a slow STT provider can't starve
+            # scoring/embeddings (separate worker pools — spec §8).
+            transcribe:
+                dsn: '%env(MESSENGER_TRANSCRIBE_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 2000
+                    multiplier: 2
+
+            # Permanent failures land here (dead-letter).
+            failed:
+                dsn: '%env(MESSENGER_FAILED_DSN)%'
+
+            sync: 'sync://'
+
+        routing:
+            # Message → transport routing is added per pipeline stage from M2.
+            # 'App\Application\Message\TranscribeCallMessage': transcribe
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                async: 'in-memory://'
+                transcribe: 'in-memory://'

@@ -1,0 +1,119 @@
+# =============================================================================
+# CallLens — base stack (prod-like). Local dev auto-loads docker-compose.override.yml;
+# production uses `-f docker-compose.yml -f docker-compose.prod.yml`.
+#
+# Security model: only `nginx` (API) and `web` publish ports. Data services
+# (db, redis, cube, minio) are reachable on the internal docker network ONLY —
+# the dev override is what exposes their ports locally for debugging.
+# =============================================================================
+
+services:
+  # --- Symfony API (PHP 8.5 + PHP-FPM) ---------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: prod
+    env_file: [.env]
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_started }
+    networks: [internal]
+
+  # --- Nginx (public TLS entry in prod is aaPanel-managed; here it proxies api)
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on: [api]
+    volumes:
+      - ./docker/nginx/api.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "${API_PORT:-8080}:80"
+    networks: [internal]
+
+  # --- Messenger workers (transcribe / score / embed) ------------------------
+  worker:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: prod
+    command: php bin/console messenger:consume async transcribe --time-limit=3600 --memory-limit=256M -v
+    env_file: [.env]
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_started }
+    restart: unless-stopped
+    networks: [internal]
+
+  # --- Symfony Scheduler (retention sweeps, housekeeping) --------------------
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: prod
+    command: php bin/console messenger:consume scheduler_default --time-limit=3600 -v
+    env_file: [.env]
+    depends_on:
+      db: { condition: service_healthy }
+    restart: unless-stopped
+    networks: [internal]
+
+  # --- PostgreSQL 17 + pgvector ----------------------------------------------
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-callens}
+      POSTGRES_USER: ${POSTGRES_USER:-callens}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-callens}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-callens} -d ${POSTGRES_DB:-callens}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  # --- Redis 7.4 (cache + Messenger broker) ----------------------------------
+  redis:
+    image: redis:7.4-alpine
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    networks: [internal]
+
+  # --- Next.js (landing / docs / cabinet) ------------------------------------
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: ../../docker/node/Dockerfile
+      target: prod
+    env_file: [.env]
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on: [nginx]
+    networks: [internal]
+
+  # --- Cube (analytics semantic layer over Postgres) -------------------------
+  cube:
+    image: cubejs/cube:latest
+    environment:
+      CUBEJS_DEV_MODE: ${CUBEJS_DEV_MODE:-false}
+      CUBEJS_DB_TYPE: postgres
+      CUBEJS_DB_HOST: db
+      CUBEJS_DB_NAME: ${POSTGRES_DB:-callens}
+      CUBEJS_DB_USER: ${POSTGRES_USER:-callens}
+      CUBEJS_DB_PASS: ${POSTGRES_PASSWORD:-callens}
+      CUBEJS_API_SECRET: ${CUBEJS_API_SECRET:-dev_cube_secret_change_me}
+    volumes:
+      - ./services/cube:/cube/conf
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [internal]
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  db_data:
+  redis_data:

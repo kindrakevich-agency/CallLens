@@ -1,0 +1,57 @@
+# =============================================================================
+# Production overrides. Use with:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# No dev services (MinIO/Mailpit), no bind mounts, no Xdebug. Object storage
+# points at Hetzner Object Storage via S3_* env. Public TLS is terminated by
+# aaPanel-managed Nginx in front of this stack; only 80/443 are exposed by the
+# host firewall. Data services remain internal-only (no published ports).
+# =============================================================================
+
+services:
+  api:
+    build:
+      target: prod
+    restart: unless-stopped
+    environment:
+      APP_ENV: prod
+
+  nginx:
+    restart: unless-stopped
+    # In prod the host's aaPanel Nginx proxies here; bind only to loopback.
+    ports:
+      - "127.0.0.1:${API_PORT:-8080}:80"
+
+  worker:
+    build:
+      target: prod
+    restart: unless-stopped
+    environment:
+      APP_ENV: prod
+    deploy:
+      replicas: 2
+
+  scheduler:
+    build:
+      target: prod
+    restart: unless-stopped
+    environment:
+      APP_ENV: prod
+
+  web:
+    build:
+      target: prod
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+
+  cube:
+    restart: unless-stopped
+    environment:
+      CUBEJS_DEV_MODE: "false"
+
+  db:
+    restart: unless-stopped
+
+  redis:
+    restart: unless-stopped

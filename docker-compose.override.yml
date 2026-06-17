@@ -1,0 +1,96 @@
+# =============================================================================
+# Local dev overrides (auto-loaded by `docker compose up`).
+# Adds: live code bind-mounts, Xdebug-enabled `dev` image target, MinIO + Mailpit,
+# and publishes data-service ports for local debugging.
+# =============================================================================
+
+services:
+  api:
+    build:
+      target: dev
+    volumes:
+      - ./apps/api:/app
+    environment:
+      APP_ENV: dev
+
+  worker:
+    build:
+      target: dev
+    volumes:
+      - ./apps/api:/app
+    environment:
+      APP_ENV: dev
+
+  scheduler:
+    build:
+      target: dev
+    volumes:
+      - ./apps/api:/app
+    environment:
+      APP_ENV: dev
+
+  web:
+    build:
+      target: dev
+    command: npm run dev
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules        # keep container's installed modules
+      - /app/.next
+
+  # nginx needs the app code to resolve $realpath_root and serve static files.
+  # (php-fpm and nginx must agree on the absolute path of public/index.php.)
+  nginx:
+    volumes:
+      - ./apps/api:/app:ro
+
+  cube:
+    environment:
+      CUBEJS_DEV_MODE: "true"
+    ports:
+      - "4000:4000"              # Cube dev playground + API
+
+  db:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  # --- MinIO — S3-compatible object store for dev ----------------------------
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_KEY:-callens}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET:-callens-secret}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"              # S3 API
+      - "9001:9001"              # MinIO console
+    networks: [internal]
+
+  # Creates the audio bucket on startup, then exits.
+  minio-setup:
+    image: minio/mc:latest
+    depends_on: [minio]
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 ${S3_KEY:-callens} ${S3_SECRET:-callens-secret}; do sleep 1; done;
+      mc mb --ignore-existing local/${S3_BUCKET:-callens-audio};
+      echo 'bucket ready';
+      "
+    networks: [internal]
+
+  # --- Mailpit — captures outgoing mail; web UI at :8025 ---------------------
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"              # SMTP
+      - "8025:8025"              # web UI
+    networks: [internal]
+
+volumes:
+  minio_data:
