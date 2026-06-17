@@ -4,6 +4,11 @@ CallLens is configured through environment variables (`.env`, copied from
 `.env.example`) plus per-tenant overrides stored in the database. Secrets must
 never be committed; in production use the Symfony secrets vault.
 
+> **Looking for where to get the API keys** (Deepgram, OpenAI, Google OAuth,
+> Hetzner)? See **[credentials.md](./credentials.md)** — a step-by-step guide to
+> registering for each service and which variable to set. This page is the
+> reference for *what each variable is*.
+
 `docker compose up` works with the shipped `.env.example` defaults out of the
 box — the AI providers default to `fake`, so the full pipeline runs with no paid
 calls.

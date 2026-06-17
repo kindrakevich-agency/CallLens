@@ -13,6 +13,7 @@ remaining milestone.** Docs mark any unbuilt parts as **Planned (Mx)**.
 - [Architecture](architecture.md) — system overview, services, request paths, exposure model.
 - [Local development](local-development.md) — `make up`, service URLs/ports, tests, troubleshooting.
 - [Configuration](configuration.md) — every environment variable + per-tenant settings.
+- [Credentials & API keys](credentials.md) — **where to register and get each key** (Deepgram, OpenAI, Google, Hetzner) and where to put it. (None needed to start — defaults run with no paid calls.)
 
 ## Domain & processing
 - [Data model](data-model.md) — entities, ERD, enums, multi-tenancy.
