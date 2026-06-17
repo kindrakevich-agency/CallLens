@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Controller;
 
+use App\Application\Auth\AccountSecurityService;
 use App\Application\Auth\RegisterUserService;
 use App\Domain\User\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,6 +27,7 @@ final class AuthController extends AbstractController
     public function register(
         Request $request,
         RegisterUserService $registrar,
+        AccountSecurityService $accounts,
         RateLimiterFactory $registrationLimiter,
     ): JsonResponse {
         if (!$registrationLimiter->create($request->getClientIp())->consume()->isAccepted()) {
@@ -53,6 +55,8 @@ final class AuthController extends AbstractController
         } catch (\DomainException $e) {
             return $this->error($e->getMessage(), Response::HTTP_CONFLICT);
         }
+
+        $accounts->sendVerificationEmail($user);
 
         return new JsonResponse($this->userPayload($user), Response::HTTP_CREATED);
     }

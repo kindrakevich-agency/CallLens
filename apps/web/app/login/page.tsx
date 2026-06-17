@@ -7,19 +7,32 @@ import { Logo } from "@/components/Brand";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [form, setForm] = useState({ email: "", password: "", name: "", workspace: "" });
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [k]: e.target.value });
 
+  const switchMode = (m: "login" | "register" | "forgot") => {
+    setMode(m);
+    setError(null);
+    setNotice(null);
+  };
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setNotice(null);
     try {
+      if (mode === "forgot") {
+        await api.requestPasswordReset(form.email);
+        setNotice("If that email has an account, a reset link is on its way.");
+        return;
+      }
       if (mode === "register") {
         await api.register({ email: form.email, password: form.password, name: form.name, workspace: form.workspace });
       }
@@ -55,14 +68,21 @@ export default function LoginPage() {
       <div className="flex items-center justify-center bg-white p-8">
         <form onSubmit={submit} className="w-full max-w-sm">
           <h2 className="font-display text-2xl font-bold text-ink">
-            {mode === "login" ? "Sign in" : "Create your workspace"}
+            {mode === "login" ? "Sign in" : mode === "register" ? "Create your workspace" : "Reset your password"}
           </h2>
           <p className="mt-1 text-sm text-slate-500">
-            {mode === "login" ? "Welcome back." : "You'll be the workspace owner."}
+            {mode === "login"
+              ? "Welcome back."
+              : mode === "register"
+                ? "You'll be the workspace owner."
+                : "We'll email you a link to set a new password."}
           </p>
 
           {error && (
             <div className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div>
+          )}
+          {notice && (
+            <div className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</div>
           )}
 
           {mode === "register" && (
@@ -73,16 +93,27 @@ export default function LoginPage() {
           <Field label="Email">
             <input type="email" className={inputCls} value={form.email} onChange={set("email")} required />
           </Field>
-          <Field label="Password">
-            <input
-              type="password"
-              className={inputCls}
-              value={form.password}
-              onChange={set("password")}
-              minLength={8}
-              required
-            />
-          </Field>
+          {mode !== "forgot" && (
+            <Field label="Password">
+              <input
+                type="password"
+                className={inputCls}
+                value={form.password}
+                onChange={set("password")}
+                minLength={8}
+                required
+              />
+            </Field>
+          )}
+          {mode === "login" && (
+            <button
+              type="button"
+              onClick={() => switchMode("forgot")}
+              className="mt-2 text-xs text-slate-500 hover:text-brand-700"
+            >
+              Forgot your password?
+            </button>
+          )}
           {mode === "register" && (
             <Field label="Workspace name (optional)">
               <input className={inputCls} value={form.workspace} onChange={set("workspace")} />
@@ -94,15 +125,12 @@ export default function LoginPage() {
             disabled={busy}
             className="mt-6 w-full rounded-lg bg-brand-600 px-4 py-2.5 font-medium text-white transition hover:bg-brand-700 disabled:opacity-60"
           >
-            {busy ? "…" : mode === "login" ? "Sign in" : "Create workspace"}
+            {busy ? "…" : mode === "login" ? "Sign in" : mode === "register" ? "Create workspace" : "Send reset link"}
           </button>
 
           <button
             type="button"
-            onClick={() => {
-              setMode(mode === "login" ? "register" : "login");
-              setError(null);
-            }}
+            onClick={() => switchMode(mode === "login" ? "register" : "login")}
             className="mt-4 w-full text-center text-sm text-brand-600 hover:text-brand-700"
           >
             {mode === "login" ? "Create a workspace" : "Already have an account? Sign in"}
