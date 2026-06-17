@@ -132,8 +132,20 @@ recolor it off-brand, or place it on busy backgrounds.
 | Full landing/branding port from `doc/html/` + MDX docs site | Planned (M9) |
 | Vitest + Playwright frontend tests | Planned |
 
-## Cabinet screenshots (M6)
+## Cabinet screenshots
 
-| Calls | Call detail | Semantic search |
-|---|---|---|
-| ![Calls](images/cabinet-calls.png) | ![Detail](images/cabinet-call-detail.png) | ![Search](images/cabinet-search.png) |
+**Calls list (M6)**
+
+![Calls](images/cabinet-calls.png)
+
+**Call detail — transcript + per-criterion scores with evidence (M6)**
+
+![Call detail](images/cabinet-call-detail.png)
+
+**Semantic search (M6)**
+
+![Semantic search](images/cabinet-search.png)
+
+**Analytics dashboard — Cube semantic layer (M7)**
+
+![Analytics dashboard](images/cabinet-analytics.png)
