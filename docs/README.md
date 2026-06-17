@@ -3,9 +3,11 @@
 Living documentation for CallLens — maintained alongside the code (every feature
 change updates the relevant doc in the same PR, per the spec's Definition of Done).
 
-**Build status:** M0 (scaffolding), M1 (auth & tenancy) and M2 (ingestion +
-pipeline skeleton) are implemented. M3–M11 are planned; docs mark unbuilt parts
-as **Planned (Mx)**.
+**Build status:** **M0–M10 implemented** — scaffolding, auth & tenancy, ingestion
+& pipeline, Deepgram STT (M3), OpenAI scoring (M4), pgvector embeddings & semantic
+search (M5), the cabinet (M6), Cube analytics (M7), audio retention (M8),
+docs & API docs (M9), and security hardening (M10). **M11 (deploy & ops) is the
+remaining milestone.** Docs mark any unbuilt parts as **Planned (Mx)**.
 
 ## Start here
 - [Architecture](architecture.md) — system overview, services, request paths, exposure model.
@@ -25,7 +27,7 @@ as **Planned (Mx)**.
 
 ## Frontend, analytics, ops
 - [Frontend](frontend.md) — Next.js structure, route areas, design tokens.
-- [Reports & analytics](reports-analytics.md) — the Cube semantic layer (planned M7).
+- [Reports & analytics](reports-analytics.md) — the Cube semantic layer + cabinet dashboard.
 - [Deployment](deployment.md) — git-based deploy, migrations, rollback.
 - [Operations & runbooks](operations-runbooks.md) — incident runbooks + health checks.
 

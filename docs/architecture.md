@@ -8,14 +8,15 @@ This document describes the system that exists today and links each concept back
 the canonical brief in [`../README.md`](../README.md) (§3 architecture, §4 stack,
 §5 layout, §12 exposure, §16 security, §17 infra).
 
-> **Build status.** The codebase is at **M2**. **Done:** M0 (scaffolding —
-> monorepo, full Docker Compose stack, Makefile, base Symfony + Next.js),
-> M1 (auth & tenancy — email + Google sign-in, JWT cookie sessions, tenants,
-> users, roles, Doctrine tenant filter, audit log), and M2 (ingestion + pipeline
-> skeleton — signed webhook + upload, object storage, `Call` entity, Messenger +
-> Workflow, `fake` AI providers running end-to-end). **Planned:** M3 transcription,
-> M4 scoring, M5 embeddings & search, M6 cabinet, M7 reports, M8 audio retention,
-> M9 docs, M10 security hardening, M11 deploy & ops (see README §21).
+> **Build status. M0–M10 are done:** M0 scaffolding (monorepo, full Docker Compose
+> stack, base Symfony + Next.js), M1 auth & tenancy (email + Google sign-in, JWT
+> cookie sessions, Doctrine tenant filter, audit log), M2 ingestion + pipeline
+> (signed webhook + upload, object storage, Messenger + Workflow), M3 Deepgram STT,
+> M4 OpenAI scoring with evidence validation, M5 pgvector embeddings & semantic
+> search, M6 the cabinet, M7 Cube analytics, M8 audio retention, M9 docs & API docs
+> (landing, docs site, OpenAPI/ReDoc), M10 security hardening (headers, CSRF, CI +
+> dependency audits). Real STT/LLM/embedding providers sit behind env-selected
+> factories with `fake` defaults. **Remaining:** M11 deploy & ops (see README §21).
 
 ---
 
@@ -48,9 +49,9 @@ flowchart LR
   end
 
   subgraph ext[External AI APIs — paid, per use; 'fake' by default]
-    STT["STT — Deepgram (planned M3)"]
-    LLM["LLM scoring — OpenAI (planned M4)"]
-    EMB["Embeddings — OpenAI (planned M5)"]
+    STT["STT — Deepgram (M3)"]
+    LLM["LLM scoring — OpenAI (M4)"]
+    EMB["Embeddings — OpenAI (M5)"]
   end
 
   TEL["Telephony / CRM"] -- "signed webhook (HMAC)" --> NX
@@ -72,8 +73,9 @@ flowchart LR
   API -- mail --> MP
 ```
 
-Dashed edges to the external AI providers are wired through interfaces but resolve
-to deterministic `fake` implementations today (real provider clients land in M3–M5).
+Dashed edges to the external AI providers go through interfaces with env-selected
+implementations: real clients (Deepgram, OpenAI) ship today, with deterministic
+`fake` implementations as the default so the pipeline runs with no paid calls.
 
 ### Exposure model
 

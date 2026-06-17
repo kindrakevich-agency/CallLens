@@ -42,7 +42,7 @@ make down            # stop everything
 
 **Services:** `api` (PHP 8.5 / Symfony 7.4 + PHP-FPM), `nginx`, `worker` + `scheduler` (Messenger), `db` (PostgreSQL 17 + pgvector), `redis`, `web` (Next.js), `cube`, plus `minio` + `mailpit` in dev. See the repo layout in §5 and the milestone plan in §21.
 
-**Documentation:** full docs live in [`docs/`](docs/) (start at [`docs/README.md`](docs/README.md)) — architecture, local development, configuration, data model, processing pipeline, integrations, authentication & security, webhooks, API reference, frontend, reports, deployment, runbooks, and ADRs. **Build status: M0, M1, M2 implemented**; M3–M11 planned.
+**Documentation:** full docs live in [`docs/`](docs/) (start at [`docs/README.md`](docs/README.md)) — architecture, local development, configuration, data model, processing pipeline, integrations, authentication & security, webhooks, API reference, frontend, reports, deployment, runbooks, and ADRs. **Build status: M0–M10 implemented** (scaffolding → auth/tenancy → ingestion/pipeline → Deepgram STT → OpenAI scoring → pgvector embeddings & search → cabinet → Cube analytics → audio retention → docs/API docs → security hardening). **M11 (deploy & ops) is the remaining milestone.**
 
 ---
 
