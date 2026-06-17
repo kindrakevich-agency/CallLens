@@ -1,0 +1,223 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CallLens API",
+    "version": "0.9.0",
+    "description": "CallLens ingests sales-team phone calls, transcribes them with speaker separation, scores each rep against a configurable scorecard, embeds utterances for semantic search, and exposes reports.\n\n**Exposure tiers** (spec §12.1):\n- **Public**: the marketing site and `/docs`.\n- **Auth** (`/auth/*`): public, rate-limited.\n- **Webhook** (`/v1/webhooks/calls`): public, HMAC-signed only.\n- **Cabinet** (`/api/v1/*`): authenticated + tenant-scoped (JWT in an HttpOnly cookie).\n- **Internal** (`/internal/*`): not internet-exposed."
+  },
+  "servers": [
+    { "url": "http://localhost:8081", "description": "Local dev (Nginx)" },
+    { "url": "https://api.calllens.app", "description": "Production" }
+  ],
+  "tags": [
+    { "name": "Health" },
+    { "name": "Auth" },
+    { "name": "Webhooks" },
+    { "name": "Calls" },
+    { "name": "Search" },
+    { "name": "Agents" },
+    { "name": "Scorecards" },
+    { "name": "Settings" },
+    { "name": "Reports" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "access_token",
+        "description": "Short-lived JWT set as an HttpOnly/Secure/SameSite=Lax cookie by POST /auth/login. Refreshed via POST /auth/refresh (rotating single-use refresh cookie scoped to /auth/refresh)."
+      },
+      "webhookSignature": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-CallLens-Signature",
+        "description": "HMAC-SHA256 of `timestamp + \".\" + rawBody` using the endpoint signing secret, prefixed `sha256=`. Sent with X-CallLens-Endpoint (endpoint UUID) and X-CallLens-Timestamp (rejected outside a 300s window)."
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": { "error": { "type": "string" } }
+      },
+      "Tenant": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "slug": { "type": "string" }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "name": { "type": "string" },
+          "role": { "type": "string", "enum": ["owner", "admin", "manager", "viewer"] },
+          "emailVerified": { "type": "boolean" },
+          "tenant": { "$ref": "#/components/schemas/Tenant" }
+        }
+      },
+      "CallSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "external_id": { "type": "string" },
+          "status": { "type": "string", "enum": ["received", "transcribing", "transcribed", "scoring", "scored", "embedding", "completed", "failed"] },
+          "overall_score": { "type": ["number", "null"] },
+          "agent": { "type": ["object", "null"], "properties": { "id": { "type": "string" }, "name": { "type": "string" } } },
+          "channels": { "type": "string", "enum": ["mono", "dual"] },
+          "language": { "type": "string" }
+        }
+      },
+      "CallDetail": {
+        "allOf": [
+          { "$ref": "#/components/schemas/CallSummary" },
+          {
+            "type": "object",
+            "properties": {
+              "audio_available": { "type": "boolean" },
+              "transcript": { "type": ["string", "null"] },
+              "utterances": {
+                "type": "array",
+                "items": { "type": "object", "properties": { "speaker": { "type": "string", "enum": ["agent", "customer"] }, "start_ms": { "type": "integer" }, "text": { "type": "string" } } }
+              },
+              "criterion_scores": {
+                "type": "array",
+                "items": { "type": "object", "properties": { "key": { "type": "string" }, "score": { "type": "number" }, "max_score": { "type": "integer" }, "evidence_quote": { "type": ["string", "null"] }, "rationale": { "type": ["string", "null"] } } }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/internal/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Liveness/health probe (internal-only in prod)",
+        "responses": {
+          "200": { "description": "Healthy", "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string" }, "service": { "type": "string" }, "checks": { "type": "object" } } } } } },
+          "503": { "description": "Degraded" }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Create an account and workspace (caller becomes Owner)",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["email", "password", "name"], "properties": { "email": { "type": "string", "format": "email" }, "password": { "type": "string", "minLength": 8 }, "name": { "type": "string" }, "workspace": { "type": "string" } } } } } },
+        "responses": {
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "409": { "description": "Email already exists", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "422": { "description": "Validation error" },
+          "429": { "description": "Too many sign-up attempts (rate-limited)" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Email + password login; sets the access_token and refresh cookies",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["email", "password"], "properties": { "email": { "type": "string" }, "password": { "type": "string" } } } } } },
+        "responses": {
+          "200": { "description": "Authenticated (cookies set)" },
+          "401": { "description": "Bad credentials" }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": { "tags": ["Auth"], "summary": "Rotate tokens using the refresh cookie", "responses": { "200": { "description": "New access + refresh cookies" }, "401": { "description": "Invalid/expired/used refresh token" } } }
+    },
+    "/auth/logout": {
+      "post": { "tags": ["Auth"], "summary": "Clear the auth cookies", "security": [{ "cookieAuth": [] }], "responses": { "204": { "description": "Logged out" } } }
+    },
+    "/auth/me": {
+      "get": { "tags": ["Auth"], "summary": "Current principal", "security": [{ "cookieAuth": [] }], "responses": { "200": { "description": "User", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } }, "401": { "description": "Not authenticated" } } }
+    },
+    "/auth/google": {
+      "get": { "tags": ["Auth"], "summary": "Start Google OAuth", "responses": { "302": { "description": "Redirect to Google" } } }
+    },
+    "/v1/webhooks/calls": {
+      "post": {
+        "tags": ["Webhooks"],
+        "summary": "Ingest a call (HMAC-signed)",
+        "description": "Verifies the signature/timestamp, deduplicates by (tenant, call_id), and returns 202; audio download and processing are asynchronous.",
+        "security": [{ "webhookSignature": [] }],
+        "parameters": [
+          { "name": "X-CallLens-Endpoint", "in": "header", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "X-CallLens-Timestamp", "in": "header", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["call_id"], "properties": { "call_id": { "type": "string" }, "recording_url": { "type": "string", "format": "uri" }, "agent_id": { "type": "string" }, "channels": { "type": "string", "enum": ["mono", "dual"] }, "language": { "type": "string" }, "started_at": { "type": "string", "format": "date-time" }, "duration_sec": { "type": "integer" } } } } } },
+        "responses": {
+          "202": { "description": "Accepted", "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string" }, "call_id": { "type": "string" }, "duplicate": { "type": "boolean" } } } } } },
+          "401": { "description": "Unknown endpoint / stale timestamp / invalid signature" },
+          "422": { "description": "Invalid JSON or missing call_id" }
+        }
+      }
+    },
+    "/api/v1/calls": {
+      "get": {
+        "tags": ["Calls"],
+        "summary": "List calls (tenant-scoped)",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "agent_id", "in": "query", "schema": { "type": "string", "format": "uuid" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer", "default": 20, "maximum": 100 } }
+        ],
+        "responses": { "200": { "description": "Page of calls", "content": { "application/json": { "schema": { "type": "object", "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/CallSummary" } }, "page": { "type": "integer" }, "per_page": { "type": "integer" }, "total": { "type": "integer" } } } } } } }
+      }
+    },
+    "/api/v1/calls/{id}": {
+      "get": {
+        "tags": ["Calls"],
+        "summary": "Call detail (transcript + scores)",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "responses": { "200": { "description": "Call", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CallDetail" } } } }, "404": { "description": "Not found" } }
+      }
+    },
+    "/api/v1/calls/upload": {
+      "post": {
+        "tags": ["Calls"],
+        "summary": "Manual call upload (multipart)",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": { "required": true, "content": { "multipart/form-data": { "schema": { "type": "object", "required": ["audio"], "properties": { "audio": { "type": "string", "format": "binary" }, "external_id": { "type": "string" }, "channels": { "type": "string", "enum": ["mono", "dual"] }, "agent_external_id": { "type": "string" }, "language": { "type": "string" } } } } } },
+        "responses": { "202": { "description": "Accepted, processing dispatched" }, "200": { "description": "Duplicate (tenant, external_id)" }, "422": { "description": "Missing audio" } }
+      }
+    },
+    "/api/v1/search": {
+      "post": {
+        "tags": ["Search"],
+        "summary": "Tenant-scoped semantic search over utterances",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["query"], "properties": { "query": { "type": "string" }, "limit": { "type": "integer", "default": 10, "maximum": 50 } } } } } },
+        "responses": { "200": { "description": "Ranked matches", "content": { "application/json": { "schema": { "type": "object", "properties": { "query": { "type": "string" }, "results": { "type": "array", "items": { "type": "object", "properties": { "call_id": { "type": "string" }, "speaker": { "type": "string" }, "text": { "type": "string" }, "score": { "type": "number" } } } } } } } } }, "422": { "description": "Missing query" } }
+      }
+    },
+    "/api/v1/agents": {
+      "get": { "tags": ["Agents"], "summary": "List agents", "security": [{ "cookieAuth": [] }], "responses": { "200": { "description": "Agents" } } }
+    },
+    "/api/v1/scorecards": {
+      "get": { "tags": ["Scorecards"], "summary": "List scorecards with criteria", "security": [{ "cookieAuth": [] }], "responses": { "200": { "description": "Scorecards" } } }
+    },
+    "/api/v1/reports": {
+      "get": { "tags": ["Reports"], "summary": "Analytics overview (Cube)", "security": [{ "cookieAuth": [] }], "responses": { "200": { "description": "avg_score_per_agent, calls_per_week, avg_score_per_week, status_breakdown" } } }
+    },
+    "/api/v1/settings/webhooks": {
+      "get": { "tags": ["Settings"], "summary": "List webhook endpoints + the ingest URL", "security": [{ "cookieAuth": [] }], "responses": { "200": { "description": "Endpoints" } } },
+      "post": { "tags": ["Settings"], "summary": "Create a webhook endpoint", "security": [{ "cookieAuth": [] }], "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "source_type": { "type": "string" } } } } } }, "responses": { "201": { "description": "Created" } } }
+    },
+    "/api/v1/settings/webhooks/{id}/rotate": {
+      "post": { "tags": ["Settings"], "summary": "Regenerate an endpoint's signing secret", "security": [{ "cookieAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "responses": { "200": { "description": "New secret" }, "404": { "description": "Not found" } } }
+    },
+    "/api/v1/settings/retention": {
+      "get": { "tags": ["Settings"], "summary": "Get the audio-retention policy", "security": [{ "cookieAuth": [] }], "responses": { "200": { "description": "Policy" } } },
+      "put": { "tags": ["Settings"], "summary": "Update the audio-retention policy", "security": [{ "cookieAuth": [] }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["mode"], "properties": { "mode": { "type": "string", "enum": ["keep", "delete_after_processing", "delete_after_days"] }, "days": { "type": "integer" } } } } } }, "responses": { "200": { "description": "Updated policy" }, "422": { "description": "Invalid mode" } } }
+    }
+  }
+}

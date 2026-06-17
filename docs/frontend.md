@@ -6,16 +6,17 @@ strict mode.
 
 > **Status:** the **cabinet is built (M6)** — login, calls list/detail, semantic
 > search, agents, scorecards and settings, talking to the API with cookie auth
-> over CORS. The marketing landing and MDX docs site are still placeholders
-> (**Planned M9**); a full scorecard editor and richer settings are refinements.
+> over CORS. The marketing landing (`/`) and public docs site (`/docs`) are built
+> (M9); a full scorecard editor and richer settings are refinements.
 
 ```
 apps/web/
 ├─ app/
 │  ├─ layout.tsx              # root layout — brand fonts (Space Grotesk/Inter/IBM Plex Mono)
 │  ├─ globals.css             # Tailwind v4 + @theme brand tokens (ink/brand/api)
-│  ├─ (marketing)/page.tsx    # "/"       — marketing landing (placeholder)
-│  ├─ docs/page.tsx           # "/docs"   — documentation site (placeholder)
+│  ├─ (marketing)/page.tsx    # "/"       — marketing landing (M9)
+│  ├─ docs/page.tsx           # "/docs"   — docs index (M9)
+│  ├─ docs/webhooks/page.tsx  # "/docs/webhooks" — webhook integration reference (M9)
 │  ├─ login/page.tsx          # "/login"  — sign in / create workspace
 │  └─ app/                    # "/app/*"  — authenticated cabinet (M6)
 │     ├─ layout.tsx           #   AuthProvider + guard + sidebar shell
@@ -35,24 +36,23 @@ The browser calls the API at `NEXT_PUBLIC_API_URL` (`:8081`) with
 `credentials: "include"`; the API enables CORS-with-credentials for the SPA
 origin (`CORS_ALLOW_ORIGIN`). Auth uses the JWT cookie set by `/auth/login`.
 
-`next dev` / `next build` / `next start` via npm scripts. There are no frontend
-tests yet — Vitest (component) and Playwright (e2e) arrive in M6 (`npm test` is
-currently a no-op stub).
+`next dev` / `next build` / `next start` via npm scripts. Flows are verified with
+Playwright during development (login → cabinet, landing, docs); a committed
+Vitest/Playwright suite is a planned refinement (`npm test` is currently a stub).
 
 ## Route areas
 
 One app, three areas (spec §13):
 
-1. **Landing (`/`)** — corporate marketing page. Explains the product and links
-   to docs and the cabinet. *Implemented:* a single placeholder page that
-   already uses the brand palette (Ink background `#0C1B2A`, Teal accents). The
-   full landing — full waveform motif, sections, responsive layout — is **ported
-   from `doc/html/landing.html` in M9.**
-2. **Docs (`/docs`)** — MDX documentation site with the same corporate styling:
-   *How it works*, *How to connect* (webhook setup, dual-channel recommendation,
-   manual upload), *What reports are* (metrics, Cube), *Cabinet guide*,
-   *Security*, *API reference* (public subset), searchable. *Implemented:* a
-   placeholder page only. The MDX pipeline and content are **Planned (M9).**
+1. **Landing (`/`)** — corporate marketing page (**Implemented, M9**): sticky nav,
+   navy hero with an **animated waveform `<canvas>`** (`components/HeroCanvas.tsx`,
+   respects reduced motion), four-step onboarding, the *sound → score* section,
+   *why APIs not your own GPU*, the single-server/stack panel, CTA and footer — all
+   on the brand tokens. Ported from `doc/html/landing.html`.
+2. **Docs (`/docs`)** — public documentation site (**Implemented, M9**): an index of
+   topics plus a curated **webhook integration reference** (`/docs/webhooks`) with the
+   signing recipe, payload schema and examples. The full canonical docs live in this
+   `docs/` folder; rendering them all as MDX in-app is a refinement.
 3. **Cabinet (`/app`, authenticated)** — the product workspace. **Implemented (M6):**
    - Calls list (status filter) with links to detail.
    - Call detail: speaker-separated transcript, per-criterion scores with
@@ -76,10 +76,10 @@ three areas.
 The design language is defined in `doc/html/branding.html` (interactive brand
 guide) and `doc/html/landing.html` (reference landing).
 
-> **Status:** the brand tokens are now in the app — `app/globals.css` defines the
+> **Status:** the brand tokens are in the app — `app/globals.css` defines the
 > Ink/Teal/Amber palette via Tailwind v4 `@theme` (so `bg-ink`, `text-brand-600`,
 > etc. work), and `app/layout.tsx` loads Space Grotesk / Inter / IBM Plex Mono.
-> The full landing/branding port is still M9.
+> The landing port (incl. the animated waveform hero) shipped in M9.
 
 ### Colors
 
@@ -129,7 +129,8 @@ recolor it off-brand, or place it on busy backgrounds.
 | Cabinet: login, calls list/detail, semantic search, agents, scorecards, settings | ✅ Implemented (M6) |
 | Cabinet analytics dashboard (Cube) `/app/analytics` | ✅ Implemented (M7) |
 | Full scorecard editor, team & roles, audio playback | Planned (later) |
-| Full landing/branding port from `doc/html/` + MDX docs site | Planned (M9) |
+| Marketing landing (`/`) + public docs site (`/docs`) | ✅ Implemented (M9) |
+| In-app MDX rendering of the full docs / richer scorecard editor | Planned (refinement) |
 | Vitest + Playwright frontend tests | Planned |
 
 ## Cabinet screenshots
@@ -149,3 +150,11 @@ recolor it off-brand, or place it on busy backgrounds.
 **Analytics dashboard — Cube semantic layer (M7)**
 
 ![Analytics dashboard](images/cabinet-analytics.png)
+
+**Marketing landing (M9)**
+
+![Landing](images/landing-app.png)
+
+**Public docs site (M9)**
+
+![Docs](images/docs-index.png)

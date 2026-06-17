@@ -56,7 +56,8 @@ security:
                 - App\Security\GoogleAuthenticator
 
     access_control:
-        - { path: ^/internal/health$, roles: PUBLIC_ACCESS }
+        # /internal/* is network-restricted in prod (firewall); these are usable in dev.
+        - { path: ^/internal/(health|docs|openapi), roles: PUBLIC_ACCESS }
         - { path: ^/auth/(login|refresh|register|google), roles: PUBLIC_ACCESS }
         # Webhook ingest is public but HMAC-verified in the controller.
         - { path: ^/v1/webhooks/, roles: PUBLIC_ACCESS }
