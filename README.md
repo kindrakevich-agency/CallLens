@@ -20,7 +20,7 @@ The corporate marketing page. It explains the product to a sales-team audience: 
 
 ### Brand guideline — [`doc/html/branding.html`](doc/html/branding.html)
 
-The brand guideline / style guide: the **CallLens** wordmark and waveform logomark with usage do/don'ts, the full color system (Ink navy, Brand teal, **Amber = "external API"**, neutral grays — all with hex values), the type scale (Space Grotesk display, Inter body, IBM Plex Mono code), and tone-of-voice / system-language rules. It is rendered by a small custom-element runtime, [`doc/html/support.js`](doc/html/support.js) (referenced via `./support.js`, which bootstraps React from a CDN) — keep the two files together so the relative reference resolves.
+The brand guideline / style guide: the **CallLens** wordmark and waveform logomark with usage do/don'ts, the full color system (Ink navy, Brand teal, **Amber = "external API"**, neutral grays — all with hex values), the type scale (Space Grotesk display, Inter body, IBM Plex Mono code), and tone-of-voice / system-language rules. It's a single self-contained file — its custom-element runtime (which bootstraps React from a CDN to render the page) is inlined directly into the HTML, so no extra assets are needed.
 
 [![Brand guideline screenshot](doc/images/branding.png)](doc/html/branding.html)
 
