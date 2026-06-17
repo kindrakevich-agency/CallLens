@@ -52,9 +52,13 @@ fixtures: ## Load Doctrine fixtures
 seed: ## Seed a demo tenant, users, scorecard and sample calls
 	$(API) php bin/console app:seed
 
+# Tests always use the deterministic `fake` providers, regardless of any real
+# provider keys in .env, so they never make paid calls or hit external services.
+TEST_ENV := -e APP_ENV=test -e AI_STT_PROVIDER=fake -e AI_LLM_PROVIDER=fake -e AI_EMBEDDINGS_PROVIDER=fake
+
 .PHONY: test
 test: ## Run backend + frontend tests
-	$(DC) exec -e APP_ENV=test api php bin/phpunit
+	$(DC) exec $(TEST_ENV) api php bin/phpunit
 	$(DC) exec web npm test --silent
 
 .PHONY: test-db

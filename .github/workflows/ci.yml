@@ -61,4 +61,5 @@ jobs:
           docker compose run --rm -e APP_ENV=test api php bin/console doctrine:database:create --if-not-exists --no-interaction
           docker compose run --rm -e APP_ENV=test api php bin/console doctrine:migrations:migrate --no-interaction
       - name: PHPUnit
-        run: docker compose run --rm -e APP_ENV=test api php bin/phpunit
+        # Force the deterministic fake providers (no external calls in tests).
+        run: docker compose run --rm -e APP_ENV=test -e AI_STT_PROVIDER=fake -e AI_LLM_PROVIDER=fake -e AI_EMBEDDINGS_PROVIDER=fake api php bin/phpunit
