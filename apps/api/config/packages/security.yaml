@@ -34,6 +34,10 @@ security:
                 password_path: password
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            # Backoff on repeated failures (spec §11): per-IP + per-username.
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
 
         # Rotating refresh — reads the refresh cookie, issues a new token pair.
         refresh:

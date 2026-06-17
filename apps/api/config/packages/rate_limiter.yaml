@@ -1,0 +1,7 @@
+framework:
+    rate_limiter:
+        # Throttle account creation per client IP (spec §11/§16).
+        registration:
+            policy: sliding_window
+            limit: 5
+            interval: '15 minutes'

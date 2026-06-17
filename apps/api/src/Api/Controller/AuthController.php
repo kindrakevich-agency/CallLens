@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
@@ -22,8 +23,15 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 final class AuthController extends AbstractController
 {
     #[Route('/auth/register', name: 'auth_register', methods: ['POST'])]
-    public function register(Request $request, RegisterUserService $registrar): JsonResponse
-    {
+    public function register(
+        Request $request,
+        RegisterUserService $registrar,
+        RateLimiterFactory $registrationLimiter,
+    ): JsonResponse {
+        if (!$registrationLimiter->create($request->getClientIp())->consume()->isAccepted()) {
+            return $this->error('Too many sign-up attempts. Try again later.', Response::HTTP_TOO_MANY_REQUESTS);
+        }
+
         $data = $this->decode($request);
         $email = (string) ($data['email'] ?? '');
         $password = (string) ($data['password'] ?? '');

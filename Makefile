@@ -54,8 +54,13 @@ seed: ## Seed a demo tenant, users, scorecard and sample calls
 
 .PHONY: test
 test: ## Run backend + frontend tests
-	$(API) php bin/phpunit
+	$(DC) exec -e APP_ENV=test api php bin/phpunit
 	$(DC) exec web npm test --silent
+
+.PHONY: test-db
+test-db: ## Create + migrate the test database
+	$(DC) exec -e APP_ENV=test api php bin/console doctrine:database:create --if-not-exists
+	$(DC) exec -e APP_ENV=test api php bin/console doctrine:migrations:migrate --no-interaction
 
 .PHONY: lint
 lint: ## Run static analysis + linters

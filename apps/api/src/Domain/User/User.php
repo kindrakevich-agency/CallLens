@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\User;
 
 use App\Domain\Tenant\Tenant;
+use App\Domain\Tenant\TenantOwned;
 use App\Infrastructure\Doctrine\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -24,7 +25,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\UniqueConstraint(name: 'uniq_user_email', columns: ['email'])]
 #[ORM\UniqueConstraint(name: 'uniq_user_google_id', columns: ['google_id'])]
 #[ORM\Index(name: 'idx_user_tenant', columns: ['tenant_id'])]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, TenantOwned
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
