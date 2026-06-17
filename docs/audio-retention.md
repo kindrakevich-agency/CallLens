@@ -4,12 +4,15 @@ Audio files are the largest artifact and are not needed once the transcript,
 scores, and embeddings are persisted. Retention is **configuration-driven**,
 with a global env default and a per-tenant override (README §9).
 
-> **Status: the deletion behavior is Planned (M8).** Today only the `Call`
-> entity supports the deletion mechanics (`markAudioDeleted()`,
-> `audioObjectKey()` / `setAudioObjectKey()`, `audio_deleted_at` column) and the
-> env defaults exist. There is **no** retention evaluation, no
-> `DeleteAudioMessage` / `FinalizeCall`, and no scheduler sweep in the codebase
-> yet. This document describes the designed contract.
+> **Status: Implemented (M8).** Retention is config-driven and enforced:
+> `RetentionPolicyResolver` resolves the effective policy (per-tenant
+> `settings.audio_retention` over env `AUDIO_RETENTION_*`); `delete_after_processing`
+> dispatches a `DeleteAudioMessage` from `EmbedCallHandler` once a call completes;
+> `delete_after_days` runs a daily `AudioRetentionSweep` (Symfony Scheduler,
+> 03:00) that queues deletions for calls past their window. `DeleteAudioHandler`
+> removes the object (idempotent), nulls the key, sets `audio_deleted_at`, and
+> writes a ProcessingEvent + `audio.deleted` AuditLog. The cabinet already shows
+> the "audio deleted" state, and Settings edits the policy.
 
 ---
 
@@ -38,12 +41,11 @@ A tenant whose `settings.audio_retention` is unset inherits these env values.
 
 - **`keep`** — audio is never auto-deleted.
 - **`delete_after_processing`** — once a call reaches `completed`, the object is
-  removed immediately (via `DeleteAudioMessage`, dispatched from the finalize
-  step). **Planned (M8).**
+  removed immediately (a `DeleteAudioMessage` is dispatched from `EmbedCallHandler`).
 - **`delete_after_days`** — a daily **Symfony Scheduler** task
-  (`AudioRetentionSweep`) finds `completed` calls older than `days` (by
-  `created_at`/`completed_at`) that still have an `audio_object_key`, and deletes
-  them in batches. **Planned (M8).**
+  (`AudioRetentionSweep`, 03:00) finds `completed` calls older than `days` (by
+  `created_at`) that still have an `audio_object_key`, and queues deletion in
+  batches.
 
 ---
 
@@ -62,34 +64,27 @@ A tenant whose `settings.audio_retention` is unset inherits these env values.
 
 ---
 
-## 4. What exists today vs. Planned (M8)
+## 4. Implementation (M8)
 
-### Exists today
-
-[`Call`](../apps/api/src/Domain/Call/Call.php) supports the deletion mechanics:
-
-- `audio_object_key` column with `audioObjectKey()` / `setAudioObjectKey()` and
-  `isAudioAvailable()`.
-- `audio_deleted_at` column (`DATETIME_IMMUTABLE`, nullable).
-- `markAudioDeleted()` — stamps `audio_deleted_at = now()` **and** nulls
-  `audio_object_key` in one call, exactly matching the deletion invariant.
-
-Env defaults `AUDIO_RETENTION_MODE` / `AUDIO_RETENTION_DAYS` are present in
-`.env.example`.
-
-The pipeline's final stage
-([`EmbedCallHandler`](../apps/api/src/Application/Pipeline/EmbedCallHandler.php))
-notes in its docblock that "Audio-retention deletion is wired in M8".
-
-### Planned (M8) — not yet in code
-
-- Reading/resolving `settings.audio_retention` (tenant) over the env default.
-- A `FinalizeCall` / `CompleteCallMessage` retention evaluation after
-  `completed`, dispatching `DeleteAudioMessage`.
-- `DeleteAudioMessage` + handler: delete object, `markAudioDeleted()`, write
-  audit/`ProcessingEvent`.
-- The `AudioRetentionSweep` Symfony Scheduler task for `delete_after_days`.
-- The "audio deleted" UI state.
+- [`RetentionPolicyResolver`](../apps/api/src/Application/Retention/RetentionPolicyResolver.php)
+  — resolves the effective `RetentionPolicy` (mode + days): per-tenant
+  `settings.audio_retention` overrides env `AUDIO_RETENTION_MODE`/`_DAYS`; an
+  invalid mode falls back to `keep`.
+- [`EmbedCallHandler`](../apps/api/src/Application/Pipeline/EmbedCallHandler.php)
+  — after a call reaches `completed`, dispatches `DeleteAudioMessage` when the
+  policy is `delete_after_processing`.
+- [`AudioRetentionSweepHandler`](../apps/api/src/Application/Pipeline/AudioRetentionSweepHandler.php)
+  — handles the daily `AudioRetentionSweep` (cron `0 3 * * *` in `MainSchedule`):
+  scans `CallRepository::completedWithAudio()` (unscoped — runs without a
+  principal, spans all tenants) and queues `DeleteAudioMessage` for calls past
+  their tenant's window.
+- [`DeleteAudioHandler`](../apps/api/src/Application/Pipeline/DeleteAudioHandler.php)
+  — deletes the object (idempotent), `markAudioDeleted()`, records a
+  `ProcessingEvent` (`delete_audio`) and an `audio.deleted` `AuditLog`. Skips
+  calls not yet `completed`.
+- The cabinet call-detail page shows the **"audio deleted"** state; Settings
+  edits the policy (`PUT /api/v1/settings/retention`).
+- Tested by `RetentionPolicyResolverTest` and `AudioRetentionTest`.
 
 ---
 

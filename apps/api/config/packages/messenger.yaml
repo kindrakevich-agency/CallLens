@@ -33,6 +33,8 @@ framework:
             'App\Application\Message\IngestCallMessage': async
             'App\Application\Message\ScoreCallMessage': async
             'App\Application\Message\EmbedCallMessage': async
+            'App\Application\Message\DeleteAudioMessage': async
+            'App\Application\Message\AudioRetentionSweep': async
 
 when@test:
     framework:

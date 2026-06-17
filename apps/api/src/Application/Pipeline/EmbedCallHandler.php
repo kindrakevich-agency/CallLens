@@ -4,17 +4,22 @@ declare(strict_types=1);
 
 namespace App\Application\Pipeline;
 
+use App\Application\Message\DeleteAudioMessage;
 use App\Application\Message\EmbedCallMessage;
 use App\Application\Provider\EmbeddingClient;
+use App\Application\Retention\RetentionPolicyResolver;
+use App\Domain\Call\CallStatus;
 use App\Infrastructure\Doctrine\Repository\CallRepository;
 use App\Infrastructure\Doctrine\Repository\UtteranceRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
 
 /**
  * Final stage: embed the call's utterances (vectors stored in the pgvector
  * `embedding` column for tenant-scoped semantic search), then complete the call.
- * Audio-retention deletion is wired in M8.
+ * Once completed, the retention policy is evaluated: `delete_after_processing`
+ * dispatches audio deletion immediately (spec §9).
  */
 #[AsMessageHandler]
 final class EmbedCallHandler
@@ -24,6 +29,8 @@ final class EmbedCallHandler
         private readonly UtteranceRepository $utterances,
         private readonly EmbeddingClient $embedding,
         private readonly StepRunner $step,
+        private readonly RetentionPolicyResolver $retention,
+        private readonly MessageBusInterface $bus,
     ) {
     }
 
@@ -47,5 +54,11 @@ final class EmbedCallHandler
                 }
             }
         });
+
+        // Retention: delete audio now if the policy says so.
+        if ($call->status() === CallStatus::Completed && $call->isAudioAvailable()
+            && $this->retention->resolve($call->tenant())->deletesImmediately()) {
+            $this->bus->dispatch(new DeleteAudioMessage((string) $call->id()));
+        }
     }
 }

@@ -71,6 +71,23 @@ final class CallRepository extends ServiceEntityRepository
         return ['items' => $items, 'total' => $total];
     }
 
+    /**
+     * Completed calls that still have audio, oldest first. NOT tenant-scoped on
+     * purpose — the retention sweep runs without a principal and spans tenants.
+     *
+     * @return Call[]
+     */
+    public function completedWithAudio(int $limit): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.status = :status')->setParameter('status', CallStatus::Completed)
+            ->andWhere('c.audioObjectKey IS NOT NULL')
+            ->orderBy('c.createdAt', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function save(Call $call, bool $flush = false): void
     {
         $em = $this->getEntityManager();

@@ -173,6 +173,11 @@ class Call implements TenantOwned
         $this->durationSec = $durationSec;
     }
 
+    public function createdAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
     public function scorecardVersion(): ?Scorecard
     {
         return $this->scorecardVersion;
