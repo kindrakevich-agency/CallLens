@@ -101,6 +101,15 @@ export const api = {
   scorecards() {
     return json("/api/v1/scorecards");
   },
+  createScorecard(body: unknown) {
+    return json("/api/v1/scorecards", { method: "POST", body: JSON.stringify(body) });
+  },
+  updateScorecard(id: string, body: unknown) {
+    return json(`/api/v1/scorecards/${id}`, { method: "PUT", body: JSON.stringify(body) });
+  },
+  deleteScorecard(id: string) {
+    return json(`/api/v1/scorecards/${id}`, { method: "DELETE" });
+  },
 
   // --- reports / analytics ---
   reports() {

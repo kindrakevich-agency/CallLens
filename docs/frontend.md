@@ -7,7 +7,7 @@ strict mode.
 > **Status:** the **cabinet is built (M6)** — login, calls list/detail, semantic
 > search, agents, scorecards and settings, talking to the API with cookie auth
 > over CORS. The marketing landing (`/`) and public docs site (`/docs`) are built
-> (M9); a full scorecard editor and richer settings are refinements.
+> (M9); richer settings are refinements (the scorecard editor shipped).
 
 ```
 apps/web/

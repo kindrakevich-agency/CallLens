@@ -74,9 +74,19 @@ class Scorecard implements TenantOwned
         return $this->name;
     }
 
+    public function rename(string $name): void
+    {
+        $this->name = $name;
+    }
+
     public function version(): int
     {
         return $this->version;
+    }
+
+    public function bumpVersion(): void
+    {
+        ++$this->version;
     }
 
     public function isDefault(): bool
@@ -84,11 +94,22 @@ class Scorecard implements TenantOwned
         return $this->isDefault;
     }
 
+    public function setDefault(bool $isDefault): void
+    {
+        $this->isDefault = $isDefault;
+    }
+
     public function addCriterion(Criterion $criterion): void
     {
         if (!$this->criteria->contains($criterion)) {
             $this->criteria->add($criterion);
         }
+    }
+
+    /** Replace all criteria (orphanRemoval deletes the old rows on flush). */
+    public function clearCriteria(): void
+    {
+        $this->criteria->clear();
     }
 
     /** @return Collection<int, Criterion> */
