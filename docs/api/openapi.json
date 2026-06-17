@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "CallLens API",
-    "version": "0.9.0",
+    "version": "1.0.0",
     "description": "CallLens ingests sales-team phone calls, transcribes them with speaker separation, scores each rep against a configurable scorecard, embeds utterances for semantic search, and exposes reports.\n\n**Exposure tiers** (spec §12.1):\n- **Public**: the marketing site and `/docs`.\n- **Auth** (`/auth/*`): public, rate-limited.\n- **Webhook** (`/v1/webhooks/calls`): public, HMAC-signed only.\n- **Cabinet** (`/api/v1/*`): authenticated + tenant-scoped (JWT in an HttpOnly cookie).\n- **Internal** (`/internal/*`): not internet-exposed."
   },
   "servers": [
@@ -17,6 +17,7 @@
     { "name": "Search" },
     { "name": "Agents" },
     { "name": "Scorecards" },
+    { "name": "Team" },
     { "name": "Settings" },
     { "name": "Reports" }
   ],
@@ -69,6 +70,47 @@
           "agent": { "type": ["object", "null"], "properties": { "id": { "type": "string" }, "name": { "type": "string" } } },
           "channels": { "type": "string", "enum": ["mono", "dual"] },
           "language": { "type": "string" }
+        }
+      },
+      "Criterion": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string", "description": "snake_case identifier" },
+          "title": { "type": "string" },
+          "weight": { "type": "number" },
+          "max_score": { "type": "integer" },
+          "guidance": { "type": ["string", "null"], "description": "Shown to the LLM scorer" }
+        }
+      },
+      "Scorecard": {
+        "type": "object",
+        "properties": {
+          "id": { "type": ["string", "null"], "format": "uuid", "description": "null for the built-in default" },
+          "name": { "type": "string" },
+          "version": { "type": "integer" },
+          "is_default": { "type": "boolean" },
+          "is_builtin": { "type": "boolean", "description": "true for the read-only default surfaced when no custom scorecard exists" },
+          "criteria": { "type": "array", "items": { "$ref": "#/components/schemas/Criterion" } }
+        }
+      },
+      "ScorecardInput": {
+        "type": "object",
+        "required": ["name", "criteria"],
+        "properties": {
+          "name": { "type": "string" },
+          "is_default": { "type": "boolean" },
+          "criteria": { "type": "array", "minItems": 1, "items": { "$ref": "#/components/schemas/Criterion" } }
+        }
+      },
+      "TeamMember": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "name": { "type": "string" },
+          "role": { "type": "string", "enum": ["owner", "admin", "manager", "viewer"] },
+          "email_verified": { "type": "boolean" },
+          "is_self": { "type": "boolean" }
         }
       },
       "CallDetail": {
@@ -140,6 +182,53 @@
     "/auth/google": {
       "get": { "tags": ["Auth"], "summary": "Start Google OAuth", "responses": { "302": { "description": "Redirect to Google" } } }
     },
+    "/auth/password/forgot": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Request a password-reset link (non-revealing)",
+        "description": "Always returns 204 — never discloses whether the address has an account. If it does, a single-use reset link (1-hour TTL) is emailed. Rate-limited per IP.",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["email"], "properties": { "email": { "type": "string", "format": "email" } } } } } },
+        "responses": {
+          "204": { "description": "Accepted (whether or not the email exists)" },
+          "429": { "description": "Too many requests (rate-limited)" }
+        }
+      }
+    },
+    "/auth/password/reset": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Set a new password using an emailed token",
+        "description": "Consumes a single-use reset token, rotates the password hash and marks the email verified.",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["token", "password"], "properties": { "token": { "type": "string" }, "password": { "type": "string", "minLength": 8 } } } } } },
+        "responses": {
+          "204": { "description": "Password updated" },
+          "422": { "description": "Invalid/expired token or password too short", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/auth/email/verify": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Confirm an email using an emailed token",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["token"], "properties": { "token": { "type": "string" } } } } } },
+        "responses": {
+          "200": { "description": "Verified", "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string" } } } } } },
+          "422": { "description": "Invalid/expired token", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/auth/email/resend": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Re-send the verification email",
+        "description": "No-op if the email is already verified.",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "204": { "description": "Sent (or no-op)" },
+          "401": { "description": "Not authenticated" }
+        }
+      }
+    },
     "/v1/webhooks/calls": {
       "post": {
         "tags": ["Webhooks"],
@@ -203,7 +292,95 @@
       "get": { "tags": ["Agents"], "summary": "List agents", "security": [{ "cookieAuth": [] }], "responses": { "200": { "description": "Agents" } } }
     },
     "/api/v1/scorecards": {
-      "get": { "tags": ["Scorecards"], "summary": "List scorecards with criteria", "security": [{ "cookieAuth": [] }], "responses": { "200": { "description": "Scorecards" } } }
+      "get": {
+        "tags": ["Scorecards"],
+        "summary": "List scorecards with criteria",
+        "description": "Returns the tenant's scorecards; when none exist, a read-only built-in default (is_builtin: true) is surfaced so calls are still scored.",
+        "security": [{ "cookieAuth": [] }],
+        "responses": { "200": { "description": "Scorecards", "content": { "application/json": { "schema": { "type": "object", "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/Scorecard" } } } } } } } }
+      },
+      "post": {
+        "tags": ["Scorecards"],
+        "summary": "Create a scorecard (manager+)",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ScorecardInput" } } } },
+        "responses": {
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Scorecard" } } } },
+          "403": { "description": "Requires ROLE_MANAGER" },
+          "422": { "description": "Name and at least one criterion required", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/v1/scorecards/{id}": {
+      "put": {
+        "tags": ["Scorecards"],
+        "summary": "Update a scorecard (manager+); bumps version",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ScorecardInput" } } } },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Scorecard" } } } },
+          "403": { "description": "Requires ROLE_MANAGER" },
+          "404": { "description": "Not found" },
+          "422": { "description": "Validation error" }
+        }
+      },
+      "delete": {
+        "tags": ["Scorecards"],
+        "summary": "Delete a scorecard (manager+)",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "responses": { "204": { "description": "Deleted" }, "403": { "description": "Requires ROLE_MANAGER" }, "404": { "description": "Not found" } }
+      }
+    },
+    "/api/v1/team": {
+      "get": {
+        "tags": ["Team"],
+        "summary": "List workspace members",
+        "security": [{ "cookieAuth": [] }],
+        "responses": { "200": { "description": "Members", "content": { "application/json": { "schema": { "type": "object", "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/TeamMember" } } } } } } } }
+      }
+    },
+    "/api/v1/team/invite": {
+      "post": {
+        "tags": ["Team"],
+        "summary": "Invite a member (admin+); returns a one-time password",
+        "description": "Creates the member with a temporary password the inviter shares. Only an owner may grant the owner role.",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["email", "name"], "properties": { "email": { "type": "string", "format": "email" }, "name": { "type": "string" }, "role": { "type": "string", "enum": ["admin", "manager", "viewer", "owner"], "default": "viewer" } } } } } },
+        "responses": {
+          "201": { "description": "Invited", "content": { "application/json": { "schema": { "type": "object", "properties": { "member": { "$ref": "#/components/schemas/TeamMember" }, "temporary_password": { "type": "string" } } } } } },
+          "403": { "description": "Requires ROLE_ADMIN, or only an owner can grant owner" },
+          "409": { "description": "Email already exists" },
+          "422": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/v1/team/{id}/role": {
+      "put": {
+        "tags": ["Team"],
+        "summary": "Change a member's role (admin+)",
+        "description": "Guardrails: you can't change your own role, only an owner can grant owner, and the workspace must keep at least one owner.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["role"], "properties": { "role": { "type": "string", "enum": ["owner", "admin", "manager", "viewer"] } } } } } },
+        "responses": {
+          "200": { "description": "Updated member", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TeamMember" } } } },
+          "403": { "description": "Requires ROLE_ADMIN, or only an owner can grant owner" },
+          "404": { "description": "Member not found" },
+          "422": { "description": "Invalid role, own role, or last-owner guard" }
+        }
+      }
+    },
+    "/api/v1/team/{id}": {
+      "delete": {
+        "tags": ["Team"],
+        "summary": "Remove a member (admin+)",
+        "description": "You can't remove yourself or the last owner.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "responses": { "204": { "description": "Removed" }, "403": { "description": "Requires ROLE_ADMIN" }, "404": { "description": "Member not found" }, "422": { "description": "Self or last-owner guard" } }
+      }
     },
     "/api/v1/reports": {
       "get": { "tags": ["Reports"], "summary": "Analytics overview (Cube)", "security": [{ "cookieAuth": [] }], "responses": { "200": { "description": "avg_score_per_agent, calls_per_week, avg_score_per_week, status_breakdown" } } }
