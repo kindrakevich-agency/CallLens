@@ -56,6 +56,19 @@ External paid APIs (the **amber** dependencies) can degrade or go down.
    `docs/configuration.md`, or pausing the affected worker so the queue holds
    work without churning retries.
 
+## Runbook: reprocess a call (after a provider/parser fix)
+
+To re-run the pipeline for a single call — e.g. after improving the STT parser or
+switching providers — use:
+
+```bash
+docker compose exec api php bin/console app:call:reprocess <call-uuid>
+```
+
+It drops the call's transcript, utterances and scores, resets it to `received`,
+and re-dispatches transcription (real provider). It refuses if the audio has
+already been deleted by the retention policy.
+
 ## Runbook: restore from backup
 
 > **Backup/restore automation is Planned (M11).** The intended design (spec §17):
