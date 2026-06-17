@@ -27,8 +27,12 @@ framework:
             sync: 'sync://'
 
         routing:
-            # Message → transport routing is added per pipeline stage from M2.
-            # 'App\Application\Message\TranscribeCallMessage': transcribe
+            # Transcription gets its own transport so a slow STT provider can't
+            # starve scoring/embeddings (spec §8).
+            'App\Application\Message\TranscribeCallMessage': transcribe
+            'App\Application\Message\IngestCallMessage': async
+            'App\Application\Message\ScoreCallMessage': async
+            'App\Application\Message\EmbedCallMessage': async
 
 when@test:
     framework:

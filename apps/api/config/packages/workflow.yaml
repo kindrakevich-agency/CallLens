@@ -1,0 +1,43 @@
+framework:
+    workflows:
+        call:
+            type: state_machine
+            audit_trail:
+                enabled: '%kernel.debug%'
+            marking_store:
+                type: method
+                property: status
+            supports:
+                - App\Domain\Call\Call
+            initial_marking: received
+            places:
+                - received
+                - transcribing
+                - transcribed
+                - scoring
+                - scored
+                - embedding
+                - completed
+                - failed
+            transitions:
+                start_transcription:
+                    from: received
+                    to: transcribing
+                complete_transcription:
+                    from: transcribing
+                    to: transcribed
+                start_scoring:
+                    from: transcribed
+                    to: scoring
+                complete_scoring:
+                    from: scoring
+                    to: scored
+                start_embedding:
+                    from: scored
+                    to: embedding
+                complete:
+                    from: embedding
+                    to: completed
+                fail:
+                    from: [received, transcribing, transcribed, scoring, scored, embedding]
+                    to: failed

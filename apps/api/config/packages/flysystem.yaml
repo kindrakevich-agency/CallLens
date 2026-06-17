@@ -1,0 +1,9 @@
+# Object storage. The `audio.storage` service is autowired as
+# `FilesystemOperator $audioStorage` (see FlysystemObjectStorage).
+flysystem:
+    storages:
+        audio.storage:
+            adapter: 'asyncaws'
+            options:
+                client: 'AsyncAws\S3\S3Client'
+                bucket: '%env(S3_BUCKET)%'
