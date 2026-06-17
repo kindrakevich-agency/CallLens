@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Controller;
 
+use App\Domain\Scorecard\CriterionDefinition;
 use App\Domain\Scorecard\Scorecard;
 use App\Infrastructure\Doctrine\Repository\ScorecardRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,6 +26,7 @@ final class ScorecardController
                 'name' => $s->name(),
                 'version' => $s->version(),
                 'is_default' => $s->isDefault(),
+                'is_builtin' => false,
                 'criteria' => array_map(static fn ($c) => [
                     'key' => $c->key(),
                     'title' => $c->title(),
@@ -35,6 +37,25 @@ final class ScorecardController
             ],
             $this->scorecards->findBy([], ['version' => 'DESC']),
         );
+
+        // When the workspace has no custom scorecard, surface the built-in default
+        // set that the scorer actually uses — so this page matches the call detail.
+        if ($items === []) {
+            $items[] = [
+                'id' => null,
+                'name' => 'Default scorecard',
+                'version' => 1,
+                'is_default' => true,
+                'is_builtin' => true,
+                'criteria' => array_map(static fn (CriterionDefinition $d) => [
+                    'key' => $d->key,
+                    'title' => $d->title,
+                    'weight' => $d->weight,
+                    'max_score' => $d->maxScore,
+                    'guidance' => $d->guidance,
+                ], CriterionDefinition::resolve(null)),
+            ];
+        }
 
         return new JsonResponse(['items' => $items]);
     }

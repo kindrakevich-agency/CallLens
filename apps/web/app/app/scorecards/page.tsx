@@ -5,7 +5,14 @@ import { api } from "@/lib/api";
 import { PageHeader } from "@/components/PageHeader";
 
 type Criterion = { key: string; title: string; weight: number; max_score: number; guidance: string | null };
-type Scorecard = { id: string; name: string; version: number; is_default: boolean; criteria: Criterion[] };
+type Scorecard = {
+  id: string | null;
+  name: string;
+  version: number;
+  is_default: boolean;
+  is_builtin: boolean;
+  criteria: Criterion[];
+};
 
 export default function ScorecardsPage() {
   const [cards, setCards] = useState<Scorecard[] | null>(null);
@@ -19,14 +26,23 @@ export default function ScorecardsPage() {
       <PageHeader title="Scorecards" subtitle="The criteria each call is scored against." />
       <div className="space-y-6 p-8">
         {cards?.map((s) => (
-          <div key={s.id} className="rounded-xl border border-slate-200 bg-white p-5">
+          <div key={s.id ?? "builtin"} className="rounded-xl border border-slate-200 bg-white p-5">
             <div className="flex items-center gap-2">
               <h2 className="font-display font-semibold text-ink">{s.name}</h2>
               <span className="text-xs text-slate-400">v{s.version}</span>
               {s.is_default && (
                 <span className="rounded bg-brand-50 px-2 py-0.5 text-xs text-brand-700">default</span>
               )}
+              {s.is_builtin && (
+                <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">built-in</span>
+              )}
             </div>
+            {s.is_builtin && (
+              <p className="mt-2 text-xs text-slate-500">
+                This is the built-in default used while your workspace has no custom scorecard. Create
+                your own (criteria, weights, guidance) with the editor — on the roadmap.
+              </p>
+            )}
             <ul className="mt-3 divide-y divide-slate-100">
               {s.criteria.map((c) => (
                 <li key={c.key} className="flex items-center justify-between py-2 text-sm">
