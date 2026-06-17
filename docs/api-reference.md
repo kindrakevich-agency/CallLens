@@ -59,6 +59,27 @@ controllers.
 - **Auth:** **required** (authenticated principal).
 - **Response:** `200 OK` with the [User payload](#user-payload).
 
+### `POST /auth/password/forgot`
+- **Auth:** none. Rate-limited per IP (`password_reset` limiter).
+- **Request:** `{ "email": "…" }`.
+- **Response:** **always** `204 No Content` — never reveals whether the address
+  has an account. If it does, a single-use reset link (1-hour TTL) is emailed.
+
+### `POST /auth/password/reset`
+- **Auth:** none (the token is the proof).
+- **Request:** `{ "token": "…", "password": "…" }` (min 8 chars).
+- **Response:** `204` on success; `422` if the token is invalid/expired or the
+  password is too short. Also marks the email verified. The token is single-use.
+
+### `POST /auth/email/verify`
+- **Auth:** none (the token is the proof).
+- **Request:** `{ "token": "…" }`.
+- **Response:** `200 { "status": "verified" }`; `422` if invalid/expired. Single-use.
+
+### `POST /auth/email/resend`
+- **Auth:** **required.** Re-issues a verification email (no-op if already verified).
+- **Response:** `204 No Content`.
+
 ### `GET /auth/google`
 - **Auth:** none. Starts the Google OAuth flow.
 - **Response:** `302` redirect to Google (scopes: `openid`, `email`, `profile`).
@@ -135,8 +156,32 @@ principal (never from the request body).
   `{"query":"…","results":[{"call_id":"<uuid>","speaker":"agent|customer","text":"…","score":0.93}, …]}`
   where `score` is cosine similarity (`1 − distance`), highest first.
 
-> Other cabinet CRUD resources (calls, agents, scorecards, reports, settings)
-> are **planned** — see the note below.
+### `GET|POST|PUT|DELETE /api/v1/scorecards`
+- **Auth:** **required**, tenant-scoped. `GET` is open to any member; `POST` /
+  `PUT /{id}` / `DELETE /{id}` require `ROLE_MANAGER`.
+- **List:** returns the tenant's scorecards (each with `criteria`, `version`,
+  `is_default`); when none exist, a read-only built-in default (`is_builtin: true`)
+  is surfaced so calls are still scored.
+- **Body (create/update):** `{ "name": "…", "is_default": bool, "criteria": [ { "key", "title", "weight", "max_score", "guidance" }, … ] }`. Updating bumps `version`; setting `is_default` clears it on the others.
+
+### `GET /api/v1/team`
+- **Auth:** **required**, tenant-scoped. Lists members (`name`, `email`, `role`,
+  `email_verified`, `is_self`).
+
+### `POST /api/v1/team/invite`
+- **Auth:** `ROLE_ADMIN`. **Body:** `{ "email", "name", "role" }`.
+- **Response:** `201` `{ "member": {…}, "temporary_password": "…" }`. Only an owner
+  may grant the `owner` role; duplicate email → `409`.
+
+### `PUT /api/v1/team/{id}/role`
+- **Auth:** `ROLE_ADMIN`. **Body:** `{ "role" }`. Guardrails: you can't change your
+  own role, only an owner can grant `owner`, and the workspace must keep ≥1 owner.
+
+### `DELETE /api/v1/team/{id}`
+- **Auth:** `ROLE_ADMIN`. Removes a member; you can't remove yourself or the last owner.
+
+> Other cabinet resources (agents, reports, settings) follow the same
+> tenant-scoped, cookie-authenticated pattern.
 
 ---
 

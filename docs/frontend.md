@@ -4,10 +4,11 @@ The web frontend lives in `apps/web` and is a single **Next.js 16 (App Router)**
 application built with **React 19** and **Tailwind CSS v4**. TypeScript is in
 strict mode.
 
-> **Status:** the **cabinet is built (M6)** — login, calls list/detail, semantic
-> search, agents, scorecards and settings, talking to the API with cookie auth
-> over CORS. The marketing landing (`/`) and public docs site (`/docs`) are built
-> (M9); richer settings are refinements (the scorecard editor shipped).
+> **Status:** the **cabinet is built (M6)** — login, calls list/detail, call
+> upload, semantic search, agents, a full scorecard editor, team & roles, and
+> settings, talking to the API with same-origin cookie auth. The marketing
+> landing (`/`) and public docs site (`/docs`) are built (M9). Email verification
+> and password reset flows ship with the auth surface.
 
 ```
 apps/web/
@@ -17,15 +18,18 @@ apps/web/
 │  ├─ (marketing)/page.tsx    # "/"       — marketing landing (M9)
 │  ├─ docs/page.tsx           # "/docs"   — docs index (M9)
 │  ├─ docs/webhooks/page.tsx  # "/docs/webhooks" — webhook integration reference (M9)
-│  ├─ login/page.tsx          # "/login"  — sign in / create workspace
+│  ├─ login/page.tsx          # "/login"  — sign in / create workspace / forgot password
+│  ├─ reset-password/page.tsx # "/reset-password" — set a new password from an emailed link
+│  ├─ verify-email/page.tsx   # "/verify-email"   — confirm email from an emailed link
 │  └─ app/                    # "/app/*"  — authenticated cabinet (M6)
-│     ├─ layout.tsx           #   AuthProvider + guard + sidebar shell
-│     ├─ calls/page.tsx       #   calls list (status filter)
+│     ├─ layout.tsx           #   AuthProvider + guard + sidebar shell + verify-email banner
+│     ├─ calls/page.tsx       #   calls list (status filter) + upload dialog
 │     ├─ calls/[id]/page.tsx  #   call detail: transcript + per-criterion scores + evidence
 │     ├─ search/page.tsx      #   semantic search
 │     ├─ analytics/page.tsx   #   Cube-backed dashboard (M7)
 │     ├─ agents/page.tsx      #   agents
-│     ├─ scorecards/page.tsx  #   scorecards (read)
+│     ├─ scorecards/page.tsx  #   scorecard editor (criteria, weights, guidance; versioned)
+│     ├─ team/page.tsx        #   team & roles (invite, change role, remove)
 │     └─ settings/page.tsx    #   webhook endpoints + retention
 ├─ lib/    api.ts (fetch client, credentials), auth.tsx (AuthProvider/useAuth)
 ├─ components/  Sidebar, Brand (Logo/Wave/ScoreBadge/StatusBadge), PageHeader
@@ -56,19 +60,24 @@ One app, three areas (spec §13):
    signing recipe, payload schema and examples. The full canonical docs live in this
    `docs/` folder; rendering them all as MDX in-app is a refinement.
 3. **Cabinet (`/app`, authenticated)** — the product workspace. **Implemented (M6):**
-   - Calls list (status filter) with links to detail.
+   - Calls list (status filter) with links to detail, plus an **upload dialog**
+     (file + optional agent + mono/dual channels → `POST /api/v1/calls/upload`).
    - Call detail: speaker-separated transcript, per-criterion scores with
      evidence quotes + rationale, overall score, "audio deleted" state.
    - Semantic search over utterances.
    - **Analytics dashboard** (`/app/analytics`, M7) — stat cards + bar/column
      charts from the Cube semantic layer (avg score per agent, calls per week,
      avg score per week, status breakdown).
-   - Agents list; scorecards (read).
+   - Agents list.
+   - **Scorecard editor** — create/edit/delete scorecards with criteria, weights,
+     guidance and a default flag; versioned (manager+).
+   - **Team & roles** — list members, invite (one-time password), change role and
+     remove members, with owner/admin guardrails.
    - Settings: webhook endpoint URL + signing secret (regenerate/add) and the
      audio-retention policy.
    - Audio playback on the call detail (streams `GET /api/v1/calls/{id}/audio`).
-   - *Refinements (later):* a full scorecard editor, team & roles management,
-     a richer chart library.
+   - Account: email verification + password reset flows (emailed links).
+   - *Refinements (later):* a richer chart library; in-app MDX docs.
 
 Accessibility (keyboard, focus states, reduced motion), mobile-flawless
 responsiveness, and TypeScript strict mode are baseline requirements for all
@@ -129,12 +138,15 @@ recolor it off-brand, or place it on busy backgrounds.
 | Area | Status |
 | --- | --- |
 | App scaffold + Tailwind v4 `@theme` brand tokens + brand fonts | ✅ Implemented |
-| Cabinet: login, calls list/detail, semantic search, agents, scorecards, settings | ✅ Implemented (M6) |
+| Cabinet: login, calls list/detail, semantic search, agents, settings | ✅ Implemented (M6) |
 | Cabinet analytics dashboard (Cube) `/app/analytics` | ✅ Implemented (M7) |
 | Call audio playback (streamed `/api/v1/calls/{id}/audio`) | ✅ Implemented |
-| Full scorecard editor, team & roles management | Planned (later) |
+| Cabinet call upload (`/api/v1/calls/upload`) | ✅ Implemented |
+| Full scorecard editor (CRUD, versioned) | ✅ Implemented |
+| Team & roles management (invite / change role / remove) | ✅ Implemented |
+| Email verification + password reset (emailed links) | ✅ Implemented |
 | Marketing landing (`/`) + public docs site (`/docs`) | ✅ Implemented (M9) |
-| In-app MDX rendering of the full docs / richer scorecard editor | Planned (refinement) |
+| In-app MDX rendering of the full docs / richer chart library | Planned (refinement) |
 | Vitest + Playwright frontend tests | Planned |
 
 ## Cabinet screenshots
@@ -147,6 +159,10 @@ recolor it off-brand, or place it on busy backgrounds.
 
 ![Call detail](images/cabinet-call-detail.png)
 
+**Call upload — file + agent + mono/dual channels**
+
+![Call upload](images/cabinet-call-upload.png)
+
 **Semantic search (M6)**
 
 ![Semantic search](images/cabinet-search.png)
@@ -154,6 +170,18 @@ recolor it off-brand, or place it on busy backgrounds.
 **Analytics dashboard — Cube semantic layer (M7)**
 
 ![Analytics dashboard](images/cabinet-analytics.png)
+
+**Scorecards — list of criteria sets**
+
+![Scorecards](images/cabinet-scorecards.png)
+
+**Scorecard editor — criteria, weights, guidance (versioned)**
+
+![Scorecard editor](images/cabinet-scorecard-editor.png)
+
+**Team & roles — invite, change role, remove**
+
+![Team](images/cabinet-team.png)
 
 **Marketing landing (M9)**
 

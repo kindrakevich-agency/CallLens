@@ -359,7 +359,7 @@ interface ObjectStorage { put(); get(); delete(); presignedUrl(); }
 **Mechanism:**
 - Stateless **JWT stored in an HttpOnly, Secure, SameSite=Lax cookie** (never in localStorage). Short‑lived access token + rotating refresh token (refresh token reuse detection).
 - Passwords hashed with **argon2id**.
-- Email verification on email sign‑up; password reset via signed, expiring tokens.
+- Email verification on email sign‑up; password reset via single‑use, expiring tokens (only their hash is stored). A non‑revealing "forgot" endpoint and a cabinet "verify your email" banner.
 - Google OAuth via `oauth2-client-bundle` + Google provider; on first login create/link user and a tenant if none.
 - CSRF protection for cookie‑based state‑changing requests; CORS locked to the app origin only.
 - Rate limiting on auth endpoints (Symfony RateLimiter); lockout/backoff on repeated failures.

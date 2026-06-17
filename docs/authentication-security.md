@@ -118,6 +118,25 @@ own workspace as Owner, mirroring `/auth/register`.
   (path `/`) and the `refresh_token` cookie (path `/auth/refresh`). The rotating
   refresh token also self-expires, and reuse is rejected by `single_use`.
 
+### 1.5 Email verification & password reset
+
+Backed by single-use, expiring `auth_token` rows. Only the **SHA-256 hash** of a
+token is persisted, so a database read never yields a usable link; each token is
+consumed exactly once, and issuing a new one invalidates any outstanding token of
+the same type for that user.
+
+- **Email verification** — registration sends a confirmation email (24-hour TTL).
+  `POST /auth/email/verify` (public, token-authenticated) marks the mailbox
+  verified; `POST /auth/email/resend` (`ROLE_USER`) re-issues it. Google accounts
+  are verified on link. The cabinet shows a banner until the email is confirmed.
+- **Password reset** — `POST /auth/password/forgot` is **non-revealing** (always
+  `204`, rate-limited per IP) so it can't probe for registered addresses; it mails
+  a reset link (1-hour TTL). `POST /auth/password/reset` rotates the password hash
+  and, since it proves mailbox control, also marks the email verified.
+
+Mail is sent via Symfony Mailer (`MAILER_DSN` → Mailpit in dev; the null transport
+under test).
+
 ---
 
 ## 2. Token mechanism
@@ -350,10 +369,6 @@ The following are specified (§11/§15/§16) and designed-for, but are **not** i
 the current authentication code. They are listed here so the threat model is
 explicit about what is and isn't enforced today.
 
-- **Email verification** on email sign-up. The `User` model already tracks an
-  `emailVerified` flag (set true for Google accounts), but there is no
-  verification email / confirmation flow for password sign-up yet.
-- **Password reset** via signed, expiring tokens.
 - **CSRF protection** for cookie-based, state-changing requests. Because auth
   uses cookies, mutating endpoints need CSRF defenses (the `SameSite=Lax`
   cookies mitigate but do not fully replace this).
