@@ -1,13 +1,13 @@
-// Small animated waveform mark — the CallLens logomark.
-export function Wave({ className = "" }: { className?: string }) {
+// Waveform mark — the CallLens logomark. Animated equalizer when `animate`.
+export function Wave({ className = "", animate = false }: { className?: string; animate?: boolean }) {
   const bars = [8, 18, 12, 20, 9];
   return (
     <span className={`inline-flex items-end gap-[3px] text-brand-300 ${className}`} aria-hidden>
       {bars.map((h, i) => (
         <span
           key={i}
-          className="w-[3px] rounded-full bg-current"
-          style={{ height: `${h}px` }}
+          className={`w-[3px] rounded-full bg-current ${animate ? "wave-bar" : ""}`}
+          style={{ height: `${h}px`, animationDelay: animate ? `${i * 0.1}s` : undefined }}
         />
       ))}
     </span>

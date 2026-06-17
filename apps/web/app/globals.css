@@ -26,6 +26,24 @@
   --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 }
 
+/* Animated waveform logomark (the "live call" motif). */
+@keyframes wave-pulse {
+  0%, 100% { transform: scaleY(0.32); }
+  50% { transform: scaleY(1); }
+}
+.wave-bar {
+  transform-origin: bottom;
+  animation: wave-pulse 1.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wave-bar { animation: none; transform: scaleY(0.65); }
+  html { scroll-behavior: auto; }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   height: 100%;
