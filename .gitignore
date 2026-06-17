@@ -36,3 +36,6 @@ yarn-error.log*
 
 # Cube runtime data (created by the container)
 /services/cube/.cubestore/
+
+# Symfony base .env (safe defaults; real secrets come from the environment)
+!/apps/api/.env
