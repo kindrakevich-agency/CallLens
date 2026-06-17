@@ -32,9 +32,19 @@ services:
     App\Application\Provider\ObjectStorage: '@App\Infrastructure\Storage\FlysystemObjectStorage'
 
     # --- AI providers ---------------------------------------------------------
-    # STT is selected from AI_STT_PROVIDER (fake | deepgram). Scoring/embeddings
-    # are still fakes — real selection lands in M4/M5.
+    # STT selected from AI_STT_PROVIDER (fake | deepgram).
     App\Application\Provider\SpeechToTextClient:
         factory: ['@App\Infrastructure\Provider\SttClientFactory', 'create']
-    App\Application\Provider\ScoringClient: '@App\Infrastructure\Provider\Fake\FakeScoring'
+
+    # Scoring selected from AI_LLM_PROVIDER (fake | openai), then wrapped by the
+    # evidence-validating decorator so fabricated quotes are dropped.
+    scoring.inner_client:
+        class: App\Application\Provider\ScoringClient
+        factory: ['@App\Infrastructure\Provider\ScoringClientFactory', 'create']
+    App\Application\Provider\ScoringClient:
+        class: App\Infrastructure\Provider\EvidenceValidatingScoringClient
+        arguments:
+            $inner: '@scoring.inner_client'
+
+    # Embeddings still fake — real selection lands in M5.
     App\Application\Provider\EmbeddingClient: '@App\Infrastructure\Provider\Fake\FakeEmbedding'

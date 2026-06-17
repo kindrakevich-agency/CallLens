@@ -5,11 +5,11 @@ All external capabilities sit behind narrow **ports** in
 implementation is chosen by env; a deterministic **`fake`** implementation runs
 the whole pipeline with no paid calls in dev/tests (spec §6, §10).
 
-> Status legend: shipped today vs. **Planned (Mx)**. As of today **STT has a real
-> provider (Deepgram, M3) selected from `AI_STT_PROVIDER` via
-> [`SttClientFactory`](../apps/api/src/Infrastructure/Provider/SttClientFactory.php)**;
-> scoring and embeddings are still fakes (real providers planned M4–M5). The
-> default for every provider remains `fake`, so the pipeline runs with no paid calls.
+> Status legend: shipped today vs. **Planned (Mx)**. Real providers shipped:
+> **STT = Deepgram (M3)** via `SttClientFactory`, **LLM scoring = OpenAI (M4)** via
+> `ScoringClientFactory` (wrapped by `EvidenceValidatingScoringClient`). Embeddings
+> are still a fake (real provider planned M5). The default for every provider
+> remains `fake`, so the pipeline runs with no paid calls.
 
 ---
 
@@ -111,11 +111,17 @@ Defined in [`.env.example`](../.env.example) (with `EMBEDDING_DIM=1024`).
 
 > **Today:** [`config/services.yaml`](../apps/api/config/services.yaml) selects
 > `SpeechToTextClient` via `SttClientFactory` from `AI_STT_PROVIDER`
-> (`fake` | `deepgram`; AssemblyAI/Gladia throw "unsupported"). `ScoringClient`
-> and `EmbeddingClient` are still bound directly to their fakes (env-based
-> selection **Planned M4–M5**). Deepgram needs `DEEPGRAM_API_KEY` (+ `DEEPGRAM_MODEL`,
-> default `nova-3`); it reads audio from object storage and posts to
-> `/v1/listen` with `utterances=true` (`multichannel` for dual, `diarize` for mono).
+> (`fake` | `deepgram`) and `ScoringClient` via `ScoringClientFactory` from
+> `AI_LLM_PROVIDER` (`fake` | `openai`), then wraps scoring in
+> `EvidenceValidatingScoringClient`. `EmbeddingClient` is still bound to its fake
+> (selection **Planned M5**). Keys: Deepgram `DEEPGRAM_API_KEY`/`DEEPGRAM_MODEL`
+> (`nova-3`); OpenAI `OPENAI_API_KEY`/`OPENAI_LLM_MODEL` (`gpt-4o-mini`).
+>
+> **Scoring (M4):** `OpenAiScoring` calls Chat Completions at **temperature 0** with
+> a **strict JSON schema** ([`ScoringPromptBuilder`](../apps/api/src/Infrastructure/Provider/OpenAi/ScoringPromptBuilder.php)),
+> scores **only the agent's turns**, iterates the scorecard criteria (clamping each
+> score, computing a weighted overall %), and **validates every evidence quote
+> against the transcript** — fabricated quotes are dropped (nulled), score/rationale kept.
 
 ---
 
@@ -144,23 +150,26 @@ implements `ObjectStorage` over a Flysystem `FilesystemOperator`. The
 | Capability | Default provider | Alternatives | Env selector | Status |
 |---|---|---|---|---|
 | STT | Deepgram | AssemblyAI, Gladia | `AI_STT_PROVIDER` | ✅ Deepgram shipped (M3); AssemblyAI/Gladia planned |
-| LLM scoring | OpenAI (cheap tier, e.g. gpt-4o-mini class) | Google Gemini, Anthropic | `AI_LLM_PROVIDER` | Planned (M4) — fake today |
+| LLM scoring | OpenAI (gpt-4o-mini default) | Google Gemini, Anthropic | `AI_LLM_PROVIDER` | ✅ OpenAI shipped (M4) + evidence validation; Gemini/Anthropic planned |
 | Embeddings | OpenAI embeddings | Voyage | `AI_EMBEDDINGS_PROVIDER` | Planned (M5) — fake today |
 | Object storage | Hetzner Object Storage (S3) | MinIO (dev) | `S3_*` | ✅ shipped (storage port + Flysystem) |
 
 ---
 
-## 7. Scoring quality contract — Planned (M4)
+## 7. Scoring quality contract (M4 — implemented)
 
-The real `ScoringClient` must (spec §10), as the M4 contract:
+The `ScoringClient` honors (spec §10):
 
-- Call the LLM at **temperature 0**.
-- Use **strict JSON** (structured output / JSON schema) for the result.
-- Require an **evidence quote per criterion** and **validate it against the
-  transcript** (the quote must actually appear).
-- Ground scoring only in the **agent's turns**.
-- Keep a small golden set + offline eval harness (LLM-as-judge agreement) to
-  catch regressions when prompts change.
+- ✅ Call the LLM at **temperature 0** (`OpenAiScoring`).
+- ✅ Use **strict JSON** (structured output / JSON schema) for the result.
+- ✅ Require an **evidence quote per criterion** and **validate it against the
+  transcript** — enforced by `EvidenceValidatingScoringClient`, which nulls any
+  quote that doesn't appear (case/whitespace-insensitive) so fabricated quotes
+  are never persisted.
+- ✅ Ground scoring only in the **agent's turns** (system prompt scores only
+  `Agent:` lines).
+- ⏳ A golden set + offline LLM-as-judge eval harness is **Planned** (regression
+  guard for prompt changes).
 
-`FakeScoring` already honors the evidence-quote-in-transcript rule by quoting the
-first agent line verbatim, so the fake is a faithful stand-in for this contract.
+`FakeScoring` honors the same evidence rule (it quotes the first agent line
+verbatim), so it stays a faithful stand-in when `AI_LLM_PROVIDER=fake`.
