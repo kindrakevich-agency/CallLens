@@ -113,6 +113,34 @@ export const api = {
     return json(`/api/v1/scorecards/${id}`, { method: "DELETE" });
   },
 
+  // --- team ---
+  team() {
+    return json("/api/v1/team");
+  },
+  inviteMember(body: { email: string; name: string; role: string }) {
+    return json("/api/v1/team/invite", { method: "POST", body: JSON.stringify(body) });
+  },
+  changeMemberRole(id: string, role: string) {
+    return json(`/api/v1/team/${id}/role`, { method: "PUT", body: JSON.stringify({ role }) });
+  },
+  removeMember(id: string) {
+    return json(`/api/v1/team/${id}`, { method: "DELETE" });
+  },
+
+  // --- account ---
+  requestPasswordReset(email: string) {
+    return json("/auth/password/forgot", { method: "POST", body: JSON.stringify({ email }) });
+  },
+  resetPassword(token: string, password: string) {
+    return json("/auth/password/reset", { method: "POST", body: JSON.stringify({ token, password }) });
+  },
+  verifyEmail(token: string) {
+    return json("/auth/email/verify", { method: "POST", body: JSON.stringify({ token }) });
+  },
+  resendVerification() {
+    return json("/auth/email/resend", { method: "POST" });
+  },
+
   // --- reports / analytics ---
   reports() {
     return json("/api/v1/reports");
