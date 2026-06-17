@@ -5,10 +5,10 @@ FROM php:8.5-fpm-bookworm AS base
 
 # System deps for the PHP extensions we need.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        git unzip libpq-dev libicu-dev libzip-dev libonig-dev \
+        git unzip libpq-dev libicu-dev libzip-dev libonig-dev libsodium-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Core extensions: pdo_pgsql (Postgres), intl, zip, bcmath.
+# Core extensions: pdo_pgsql (Postgres), intl, zip, bcmath, sodium (argon2id).
 # (OPcache is compiled into PHP 8.5 core; we enable it below, no ext-install.)
 # Installed serially — the parallel -j flag can race the install-modules step.
 RUN docker-php-ext-configure intl \
@@ -16,6 +16,7 @@ RUN docker-php-ext-configure intl \
     && docker-php-ext-install intl \
     && docker-php-ext-install zip \
     && docker-php-ext-install bcmath \
+    && docker-php-ext-install sodium \
     && (docker-php-ext-enable opcache || true)
 
 # Redis extension via PECL.

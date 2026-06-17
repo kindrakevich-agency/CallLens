@@ -1,0 +1,27 @@
+lexik_jwt_authentication:
+    secret_key: '%env(resolve:JWT_SECRET_KEY)%'
+    public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
+    pass_phrase: '%env(JWT_PASSPHRASE)%'
+    token_ttl: '%env(int:JWT_ACCESS_TOKEN_TTL)%'
+
+    # The access token lives ONLY in an HttpOnly, Secure, SameSite=Lax cookie —
+    # never in a response body or localStorage (spec §11).
+    set_cookies:
+        access_token:
+            lifetime: '%env(int:JWT_ACCESS_TOKEN_TTL)%'
+            samesite: lax
+            path: /
+            domain: '%env(COOKIE_DOMAIN)%'
+            secure: '%env(bool:COOKIE_SECURE)%'
+            httpOnly: true
+
+    # Read the JWT back from that cookie on every request.
+    token_extractors:
+        cookie:
+            enabled: true
+            name: access_token
+        authorization_header:
+            enabled: false
+
+    # Don't leak the raw token in the JSON body — it's in the cookie.
+    remove_token_from_body_when_cookies_used: true

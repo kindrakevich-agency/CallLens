@@ -1,0 +1,64 @@
+security:
+    # argon2id via libsodium (spec §11). Explicit so it never silently falls
+    # back to bcrypt; the `sodium` algorithm hashes with argon2id.
+    password_hashers:
+        App\Domain\User\User:
+            algorithm: sodium
+
+    providers:
+        app_users:
+            entity:
+                class: App\Domain\User\User
+                property: email
+
+    role_hierarchy:
+        ROLE_OWNER:   [ROLE_ADMIN]
+        ROLE_ADMIN:   [ROLE_MANAGER]
+        ROLE_MANAGER: [ROLE_VIEWER]
+        ROLE_VIEWER:  [ROLE_USER]
+
+    firewalls:
+        dev:
+            pattern: ^/(_profiler|_wdt|assets|build)/
+            security: false
+
+        # Email + password login. On success lexik sets the access_token cookie
+        # and gesdinet sets the refresh cookie.
+        login:
+            pattern: ^/auth/login$
+            stateless: true
+            provider: app_users
+            json_login:
+                check_path: /auth/login
+                username_path: email
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        # Rotating refresh — reads the refresh cookie, issues a new token pair.
+        refresh:
+            pattern: ^/auth/refresh$
+            stateless: true
+            refresh_jwt:
+                check_path: /auth/refresh
+
+        # Everything else: authenticate via the JWT cookie.
+        main:
+            pattern: ^/
+            stateless: true
+            provider: app_users
+            jwt: ~
+
+    access_control:
+        - { path: ^/internal/health$, roles: PUBLIC_ACCESS }
+        - { path: ^/auth/(login|refresh|register|google), roles: PUBLIC_ACCESS }
+        - { path: ^/auth/me$, roles: ROLE_USER }
+        - { path: ^/api, roles: ROLE_USER }
+
+when@test:
+    security:
+        password_hashers:
+            App\Domain\User\User:
+                algorithm: sodium
+                time_cost: 3
+                memory_cost: 10

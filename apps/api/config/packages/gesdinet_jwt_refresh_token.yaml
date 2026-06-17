@@ -1,0 +1,18 @@
+gesdinet_jwt_refresh_token:
+    refresh_token_class: App\Domain\Auth\RefreshToken
+    ttl: '%env(int:JWT_REFRESH_TOKEN_TTL)%'
+
+    # Rotation with reuse detection: every refresh issues a NEW token and
+    # invalidates the old one; replaying a used token fails (spec §11).
+    single_use: true
+    return_expiration: true
+
+    # Refresh token also lives in an HttpOnly cookie, scoped to the refresh path
+    # so it is never sent with ordinary API requests.
+    cookie:
+        enabled: true
+        same_site: lax
+        path: /auth/refresh
+        domain: '%env(COOKIE_DOMAIN)%'
+        secure: '%env(bool:COOKIE_SECURE)%'
+        http_only: true
