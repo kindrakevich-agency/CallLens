@@ -111,7 +111,7 @@ flowchart LR
 | Frontend | Next.js (App Router) + React | **15+ / 19** | Landing + docs (MDX) + cabinet. |
 | Node runtime | Node.js | **22 LTS** | For Next.js and Cube. |
 | Web server | Nginx | 1.27+ | Reverse proxy + TLS (aaPanel‑managed on prod). |
-| App server | PHP‑FPM | (PHP 8.5) | FrankenPHP is an acceptable modern alternative (note in ADR). |
+| App server | PHP‑FPM | (PHP 8.5) | Nginx + PHP‑FPM only. Do **not** use FrankenPHP. |
 | API docs UI | ReDoc (primary), Scalar (optional) | latest | Rendered from generated OpenAPI. |
 | Email | Symfony Mailer | (Symfony 7.4) | Mailpit in dev; transactional provider in prod. |
 | Containers | Docker + Docker Compose v2 | latest | Same compose file dev & prod (with overrides). |
