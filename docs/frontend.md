@@ -22,6 +22,7 @@ apps/web/
 │     ├─ calls/page.tsx       #   calls list (status filter)
 │     ├─ calls/[id]/page.tsx  #   call detail: transcript + per-criterion scores + evidence
 │     ├─ search/page.tsx      #   semantic search
+│     ├─ analytics/page.tsx   #   Cube-backed dashboard (M7)
 │     ├─ agents/page.tsx      #   agents
 │     ├─ scorecards/page.tsx  #   scorecards (read)
 │     └─ settings/page.tsx    #   webhook endpoints + retention
@@ -57,11 +58,14 @@ One app, three areas (spec §13):
    - Call detail: speaker-separated transcript, per-criterion scores with
      evidence quotes + rationale, overall score, "audio deleted" state.
    - Semantic search over utterances.
+   - **Analytics dashboard** (`/app/analytics`, M7) — stat cards + bar/column
+     charts from the Cube semantic layer (avg score per agent, calls per week,
+     avg score per week, status breakdown).
    - Agents list; scorecards (read).
    - Settings: webhook endpoint URL + signing secret (regenerate/add) and the
      audio-retention policy.
-   - *Refinements (later):* analytics dashboards (Cube, M7), a full scorecard
-     editor, team & roles management, audio playback.
+   - *Refinements (later):* a full scorecard editor, team & roles management,
+     audio playback, a richer chart library.
 
 Accessibility (keyboard, focus states, reduced motion), mobile-flawless
 responsiveness, and TypeScript strict mode are baseline requirements for all
@@ -123,7 +127,7 @@ recolor it off-brand, or place it on busy backgrounds.
 | --- | --- |
 | App scaffold + Tailwind v4 `@theme` brand tokens + brand fonts | ✅ Implemented |
 | Cabinet: login, calls list/detail, semantic search, agents, scorecards, settings | ✅ Implemented (M6) |
-| Cabinet analytics dashboards (Cube) | Planned (M7) |
+| Cabinet analytics dashboard (Cube) `/app/analytics` | ✅ Implemented (M7) |
 | Full scorecard editor, team & roles, audio playback | Planned (later) |
 | Full landing/branding port from `doc/html/` + MDX docs site | Planned (M9) |
 | Vitest + Playwright frontend tests | Planned |

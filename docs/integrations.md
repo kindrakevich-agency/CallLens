@@ -145,7 +145,8 @@ implements `ObjectStorage` over a Flysystem `FilesystemOperator`. The
   (spec §7.2).
 - `delete()` swallows `FilesystemException` (idempotent).
 - `presignedUrl()` uses Flysystem `temporaryUrl`; if the adapter lacks signed-URL
-  support it returns `''` — cabinet audio streaming is **Planned (M6)**.
+  support it returns `''` — in-cabinet audio playback is a **planned refinement**
+  (the M6 cabinet shows the call's transcript/scores and an "audio deleted" state).
 
 ---
 

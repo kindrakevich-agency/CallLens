@@ -91,10 +91,10 @@ retries lands there.
 `sync://` exists for synchronous dispatch; under `when@test` both `async` and
 `transcribe` are swapped to `in-memory://`.
 
-> The README §8 pipeline also lists `FinalizeCall` / `CompleteCallMessage` and
-> `DeleteAudioMessage` for retention. Those are **Planned (M8)** — see
-> [audio-retention.md](./audio-retention.md). Today the embed handler simply
-> applies `complete` to reach `completed`.
+> Retention is wired (M8): after `complete`, the embed handler dispatches
+> `DeleteAudioMessage` when the tenant policy is `delete_after_processing`, and a
+> daily `AudioRetentionSweep` handles `delete_after_days` — see
+> [audio-retention.md](./audio-retention.md).
 
 ---
 
@@ -227,10 +227,10 @@ Two entry points:
 From there: **transcribe → score → embed → completed**, each stage dispatching
 the next on success.
 
-Vector persistence to the pgvector `Utterance.embedding` column is **Planned
-(M5)**; today `EmbedCallHandler` calls the embedding client and only marks each
-utterance embedded so the pipeline can reach `completed`. Audio-retention
-deletion after `completed` is **Planned (M8)**.
+`EmbedCallHandler` stores each embedding vector in the pgvector
+`Utterance.embedding` column (M5), then applies `complete`. Once `completed`, the
+retention policy is evaluated (M8): `delete_after_processing` dispatches audio
+deletion immediately.
 
 ### Failure path
 
