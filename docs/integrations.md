@@ -5,10 +5,11 @@ All external capabilities sit behind narrow **ports** in
 implementation is chosen by env; a deterministic **`fake`** implementation runs
 the whole pipeline with no paid calls in dev/tests (spec §6, §10).
 
-> Status legend: shipped today vs. **Planned (Mx)**. As of today **only the
-> fakes exist**; the real providers below are planned for M3–M5 and the
-> selection wiring is currently hard-bound to the fakes in
-> [`config/services.yaml`](../apps/api/config/services.yaml).
+> Status legend: shipped today vs. **Planned (Mx)**. As of today **STT has a real
+> provider (Deepgram, M3) selected from `AI_STT_PROVIDER` via
+> [`SttClientFactory`](../apps/api/src/Infrastructure/Provider/SttClientFactory.php)**;
+> scoring and embeddings are still fakes (real providers planned M4–M5). The
+> default for every provider remains `fake`, so the pipeline runs with no paid calls.
 
 ---
 
@@ -108,11 +109,13 @@ Selectors and their default value `fake`:
 
 Defined in [`.env.example`](../.env.example) (with `EMBEDDING_DIM=1024`).
 
-> **Today:** [`config/services.yaml`](../apps/api/config/services.yaml) binds each
-> port directly to its fake (`SpeechToTextClient → FakeSpeechToText`,
-> `ScoringClient → FakeScoring`, `EmbeddingClient → FakeEmbedding`). The env-based
-> factory selection of real providers is **Planned (M3–M5)** — the comment in
-> services.yaml reads "M2: fakes; real provider selection by env in M3–M5".
+> **Today:** [`config/services.yaml`](../apps/api/config/services.yaml) selects
+> `SpeechToTextClient` via `SttClientFactory` from `AI_STT_PROVIDER`
+> (`fake` | `deepgram`; AssemblyAI/Gladia throw "unsupported"). `ScoringClient`
+> and `EmbeddingClient` are still bound directly to their fakes (env-based
+> selection **Planned M4–M5**). Deepgram needs `DEEPGRAM_API_KEY` (+ `DEEPGRAM_MODEL`,
+> default `nova-3`); it reads audio from object storage and posts to
+> `/v1/listen` with `utterances=true` (`multichannel` for dual, `diarize` for mono).
 
 ---
 
@@ -136,17 +139,14 @@ implements `ObjectStorage` over a Flysystem `FilesystemOperator`. The
 
 ---
 
-## 6. Default vs alternative real providers — Planned (M3–M5)
+## 6. Real providers, defaults & alternatives
 
-Only fakes exist today. The real providers, defaults, and alternatives below
-come from the spec/README §10 and are planned:
-
-| Capability | Default provider | Alternatives | Env selector | Milestone |
+| Capability | Default provider | Alternatives | Env selector | Status |
 |---|---|---|---|---|
-| STT | Deepgram | AssemblyAI, Gladia | `AI_STT_PROVIDER` | M3 |
-| LLM scoring | OpenAI (cheap tier, e.g. gpt-4o-mini class) | Google Gemini, Anthropic | `AI_LLM_PROVIDER` | M4 |
-| Embeddings | OpenAI embeddings | Voyage | `AI_EMBEDDINGS_PROVIDER` | M5 |
-| Object storage | Hetzner Object Storage (S3) | MinIO (dev) | `S3_*` | shipped (storage port + Flysystem) |
+| STT | Deepgram | AssemblyAI, Gladia | `AI_STT_PROVIDER` | ✅ Deepgram shipped (M3); AssemblyAI/Gladia planned |
+| LLM scoring | OpenAI (cheap tier, e.g. gpt-4o-mini class) | Google Gemini, Anthropic | `AI_LLM_PROVIDER` | Planned (M4) — fake today |
+| Embeddings | OpenAI embeddings | Voyage | `AI_EMBEDDINGS_PROVIDER` | Planned (M5) — fake today |
+| Object storage | Hetzner Object Storage (S3) | MinIO (dev) | `S3_*` | ✅ shipped (storage port + Flysystem) |
 
 ---
 

@@ -31,7 +31,10 @@ services:
 
     App\Application\Provider\ObjectStorage: '@App\Infrastructure\Storage\FlysystemObjectStorage'
 
-    # --- AI providers (M2: fakes; real provider selection by env in M3–M5) ---
-    App\Application\Provider\SpeechToTextClient: '@App\Infrastructure\Provider\Fake\FakeSpeechToText'
+    # --- AI providers ---------------------------------------------------------
+    # STT is selected from AI_STT_PROVIDER (fake | deepgram). Scoring/embeddings
+    # are still fakes — real selection lands in M4/M5.
+    App\Application\Provider\SpeechToTextClient:
+        factory: ['@App\Infrastructure\Provider\SttClientFactory', 'create']
     App\Application\Provider\ScoringClient: '@App\Infrastructure\Provider\Fake\FakeScoring'
     App\Application\Provider\EmbeddingClient: '@App\Infrastructure\Provider\Fake\FakeEmbedding'
