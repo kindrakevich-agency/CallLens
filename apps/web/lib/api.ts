@@ -103,6 +103,11 @@ export const api = {
     return json("/api/v1/scorecards");
   },
 
+  // --- reports / analytics ---
+  reports() {
+    return json("/api/v1/reports");
+  },
+
   // --- settings ---
   webhooks() {
     return json("/api/v1/settings/webhooks");

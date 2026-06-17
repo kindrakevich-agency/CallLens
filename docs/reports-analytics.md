@@ -5,41 +5,45 @@ Measures and dimensions are defined once and exposed via Cube's REST/JS API to
 the cabinet, with **pre-aggregations** and caching so reports stay fast on
 Postgres alone. No separate search/analytics engine is used for reporting.
 
-> **Status: Planned (M7).** The Cube **service already runs in the stack** but
-> the data model (`services/cube/`) and the cabinet dashboards that consume it
-> are not built yet. See "What exists today" below.
+> **Status: Implemented (M7).** The Cube data model, a tenant-scoped reports API,
+> and the cabinet analytics dashboard are all built. Postgres stays the source of
+> truth; Cube only defines a query interface over existing tables.
 
-## What exists today
+## Semantic model (`services/cube/`)
 
-The `cube` service is wired into the Compose stack (`docker-compose.yml`):
+`services/cube/model/calllens.yml` defines three cubes:
 
-- Image `cubejs/cube:latest`, connected to Postgres (`CUBEJS_DB_TYPE: postgres`,
-  host `db`), reachable on the **internal Docker network only** in prod.
-- Config mounted from `./services/cube` -> `/cube/conf`.
-- In **dev** (`docker-compose.override.yml`) `CUBEJS_DEV_MODE: "true"` and the
-  **dev playground + API are exposed on `:4000`** for local exploration.
-- In **prod** (`docker-compose.prod.yml`) dev mode is off and the port is not
-  published; the cabinet reaches Cube over the internal network.
+- **`calls`** (`public.call`) — `count`; dimensions `status`, `created_at`, `tenant_id`.
+- **`agents`** (`public.agent`) — `name`, `tenant_id`.
+- **`call_scores`** — its SQL joins `call` so `agent_id` / `tenant_id` / `status`
+  are exposed directly. Measures `count`, **`avg_overall`** (avg of `overall_score`).
+  Pre-aggregation **`by_agent_week`** rolls up avg score + count per agent per week.
 
-What is **not** built yet: the cube model files, pre-aggregations, and the
-Next.js dashboard components.
+**Tenant isolation:** `services/cube/cube.js` defines a `queryRewrite` that injects
+a `tenant_id = securityContext.tenantId` filter on every query (for whichever of
+`calls` / `call_scores` / `agents` the query touches). A query with no tenant in
+the signed context is rejected.
 
-## Planned semantic model (spec §14)
+## Reports API (the cabinet's data source)
 
-Postgres remains the **single source of truth**; Cube never owns data — it only
-defines a query interface over existing tables.
+The browser does **not** call Cube directly. `GET /api/v1/reports`
+(`ReportsController`) runs the dashboard queries server-side via `CubeClient`,
+which mints a short-lived **HS256 JWT** (signed with `CUBEJS_API_SECRET`) carrying
+`{ tenantId }` as the Cube security context. This keeps Cube on the internal
+network and guarantees tenant scoping. Panels degrade to empty series if Cube is
+unavailable. It returns:
 
-- **Measures:** `avg_score`, `call_count`.
-- **Dimensions:** `agent`, `criterion`, time dimension `week`.
-- **Pre-aggregation:** `by_agent_week` — rolls up average score and call count
-  per agent per week so the common dashboards never hit raw rows.
+- `avg_score_per_agent` — `call_scores.avg_overall` by `agents.name`.
+- `calls_per_week` — `calls.count` by week.
+- `avg_score_per_week` — `call_scores.avg_overall` by week.
+- `status_breakdown` — `calls.count` by `calls.status`.
 
-Dashboards consume Cube's REST/JS API from the Next.js cabinet (`/app`):
+## Cabinet dashboard
 
-- Average score per agent.
-- Score trend over time.
-- Top objections.
-- Score distribution.
+`/app/analytics` renders stat cards (total/scored calls, avg score) and bar/column
+charts (lightweight SVG/CSS, no chart library) from `GET /api/v1/reports`.
+
+![Analytics dashboard](images/cabinet-analytics.png)
 
 ## Scaling note
 
@@ -57,6 +61,8 @@ app's Postgres (`POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD`).
 
 | Item | Status |
 | --- | --- |
-| `cube` service in Compose (dev playground `:4000`) | Implemented |
-| Cube data model (`services/cube/`), measures/dimensions, `by_agent_week` | Planned (M7) |
-| Cabinet analytics dashboards consuming Cube API | Planned (M7) |
+| `cube` service in Compose (dev playground `:4000`) | ✅ Implemented |
+| Cube data model (`services/cube/`), measures/dimensions, `by_agent_week` pre-agg | ✅ Implemented (M7) |
+| Tenant-scoped reports API (`/api/v1/reports`, signed Cube JWT) | ✅ Implemented (M7) |
+| Cabinet analytics dashboard (`/app/analytics`) | ✅ Implemented (M7) |
+| Top-objections panel, richer chart library | Planned (refinement) |

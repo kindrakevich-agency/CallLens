@@ -1,0 +1,90 @@
+# CallLens analytics semantic layer (spec §14). Postgres stays the source of
+# truth; every query is tenant-scoped by the queryRewrite in cube.js.
+cubes:
+  - name: calls
+    sql_table: public.call
+    measures:
+      - name: count
+        type: count
+    dimensions:
+      - name: id
+        sql: id
+        type: string
+        primary_key: true
+      - name: tenant_id
+        sql: tenant_id
+        type: string
+      - name: status
+        sql: status
+        type: string
+      - name: created_at
+        sql: created_at
+        type: time
+
+  - name: agents
+    sql_table: public.agent
+    measures:
+      - name: count
+        type: count
+    dimensions:
+      - name: id
+        sql: id
+        type: string
+        primary_key: true
+      - name: tenant_id
+        sql: tenant_id
+        type: string
+      - name: name
+        sql: name
+        type: string
+
+  # Joins call → exposes agent_id / tenant_id directly, so avg-score-per-agent
+  # and the by_agent_week pre-aggregation live in a single cube.
+  - name: call_scores
+    sql: >
+      SELECT cs.id, cs.overall_score, cs.created_at,
+             c.call_id_agent AS agent_id, c.tenant_id, c.status
+      FROM public.call_score cs
+      JOIN (
+        SELECT id AS call_id, agent_id AS call_id_agent, tenant_id, status
+        FROM public.call
+      ) c ON c.call_id = cs.call_id
+    joins:
+      - name: agents
+        sql: "{CUBE}.agent_id = {agents}.id"
+        relationship: many_to_one
+    measures:
+      - name: count
+        type: count
+      - name: avg_overall
+        sql: overall_score
+        type: avg
+    dimensions:
+      - name: id
+        sql: id
+        type: string
+        primary_key: true
+      - name: tenant_id
+        sql: tenant_id
+        type: string
+      - name: agent_id
+        sql: agent_id
+        type: string
+      - name: status
+        sql: status
+        type: string
+      - name: overall_score
+        sql: overall_score
+        type: number
+      - name: created_at
+        sql: created_at
+        type: time
+    pre_aggregations:
+      - name: by_agent_week
+        measures:
+          - call_scores.avg_overall
+          - call_scores.count
+        dimensions:
+          - call_scores.agent_id
+        time_dimension: call_scores.created_at
+        granularity: week
