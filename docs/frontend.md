@@ -66,8 +66,9 @@ One app, three areas (spec §13):
    - Agents list; scorecards (read).
    - Settings: webhook endpoint URL + signing secret (regenerate/add) and the
      audio-retention policy.
+   - Audio playback on the call detail (streams `GET /api/v1/calls/{id}/audio`).
    - *Refinements (later):* a full scorecard editor, team & roles management,
-     audio playback, a richer chart library.
+     a richer chart library.
 
 Accessibility (keyboard, focus states, reduced motion), mobile-flawless
 responsiveness, and TypeScript strict mode are baseline requirements for all
@@ -130,7 +131,8 @@ recolor it off-brand, or place it on busy backgrounds.
 | App scaffold + Tailwind v4 `@theme` brand tokens + brand fonts | ✅ Implemented |
 | Cabinet: login, calls list/detail, semantic search, agents, scorecards, settings | ✅ Implemented (M6) |
 | Cabinet analytics dashboard (Cube) `/app/analytics` | ✅ Implemented (M7) |
-| Full scorecard editor, team & roles, audio playback | Planned (later) |
+| Call audio playback (streamed `/api/v1/calls/{id}/audio`) | ✅ Implemented |
+| Full scorecard editor, team & roles management | Planned (later) |
 | Marketing landing (`/`) + public docs site (`/docs`) | ✅ Implemented (M9) |
 | In-app MDX rendering of the full docs / richer scorecard editor | Planned (refinement) |
 | Vitest + Playwright frontend tests | Planned |

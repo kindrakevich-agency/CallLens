@@ -145,8 +145,9 @@ implements `ObjectStorage` over a Flysystem `FilesystemOperator`. The
   (spec §7.2).
 - `delete()` swallows `FilesystemException` (idempotent).
 - `presignedUrl()` uses Flysystem `temporaryUrl`; if the adapter lacks signed-URL
-  support it returns `''` — in-cabinet audio playback is a **planned refinement**
-  (the M6 cabinet shows the call's transcript/scores and an "audio deleted" state).
+  support it returns `''`. In-cabinet audio playback streams instead through the
+  authenticated, tenant-scoped `GET /api/v1/calls/{id}/audio` endpoint (the call
+  detail page embeds an `<audio>` player); signed CDN URLs are a later refinement.
 
 ---
 

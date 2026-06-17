@@ -35,7 +35,11 @@ export default function CallDetailPage() {
             <ScoreBadge score={call.overall_score} />
           </div>
         </div>
-        {!call.audio_available && (
+        {call.audio_available ? (
+          <audio controls preload="none" src={`/api/v1/calls/${id}/audio`} className="mt-3 h-9 w-full max-w-md">
+            Your browser does not support audio playback.
+          </audio>
+        ) : (
           <p className="mt-2 text-xs text-slate-400">Audio deleted — transcript &amp; scores retained.</p>
         )}
       </header>

@@ -96,6 +96,12 @@ controllers.
 Authenticated **and tenant-scoped**. The tenant is taken from the authenticated
 principal (never from the request body).
 
+### `GET /api/v1/calls/{id}/audio`
+- **Auth:** **required** (`CurrentUser`), tenant-scoped. Streams the call's stored
+  audio (`audio/wav` | `audio/mpeg` | …) for the cabinet `<audio>` player.
+- **Responses:** `200 OK` (binary audio), `404` if the call is unknown or its
+  audio has been deleted by retention.
+
 ### `POST /api/v1/calls/upload`
 - **Auth:** **required** (`CurrentUser`). Tenant-scoped to the principal's tenant.
 - **Request:** `multipart/form-data`.

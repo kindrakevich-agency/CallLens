@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Controller;
 
+use App\Application\Provider\ObjectStorage;
 use App\Domain\Call\Call;
 use App\Domain\Call\CallStatus;
 use App\Infrastructure\Doctrine\Repository\CallRepository;
@@ -27,7 +28,40 @@ final class CallController
         private readonly TranscriptRepository $transcripts,
         private readonly UtteranceRepository $utterances,
         private readonly CallScoreRepository $callScores,
+        private readonly ObjectStorage $storage,
     ) {
+    }
+
+    #[Route('/api/v1/calls/{id}/audio', name: 'calls_audio', methods: ['GET'])]
+    public function audio(string $id): Response
+    {
+        if (!Uuid::isValid($id)) {
+            return new JsonResponse(['error' => 'Not found.'], Response::HTTP_NOT_FOUND);
+        }
+        $call = $this->calls->get(Uuid::fromString($id));
+        if ($call === null || !$call->isAudioAvailable()) {
+            return new JsonResponse(['error' => 'Audio not available.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $key = (string) $call->audioObjectKey();
+        $bytes = $this->storage->get($key);
+
+        return new Response($bytes, Response::HTTP_OK, [
+            'Content-Type' => $this->mimeFor($key),
+            'Content-Disposition' => 'inline',
+            'Cache-Control' => 'private, no-store',
+        ]);
+    }
+
+    private function mimeFor(string $key): string
+    {
+        return match (strtolower(pathinfo($key, \PATHINFO_EXTENSION))) {
+            'wav' => 'audio/wav',
+            'ogg' => 'audio/ogg',
+            'm4a' => 'audio/mp4',
+            'flac' => 'audio/flac',
+            default => 'audio/mpeg',
+        };
     }
 
     #[Route('/api/v1/calls', name: 'calls_list', methods: ['GET'])]
