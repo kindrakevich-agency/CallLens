@@ -113,8 +113,24 @@ principal (never from the request body).
   - `200 OK` (duplicate `(tenant, external_id)`) → `{"status":"duplicate","id":"<call-uuid>","external_id":"…"}`.
 - **Errors:** `422` when the `audio` field is missing.
 
-> Other cabinet CRUD resources (calls, agents, scorecards, search, reports,
-> settings) are **planned** — see the note below.
+### `POST /api/v1/search`
+- **Auth:** **required** (`CurrentUser`). Results are scoped to the principal's
+  tenant by the Doctrine tenant filter.
+- **Request:** `application/json`.
+
+| Field | Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `query` | string | **Yes** | — | Natural-language query. Empty → `422`. |
+| `limit` | int | No | `10` | Clamped to `1..50`. |
+
+- **Behaviour:** embeds the query (`EmbeddingClient`) and runs cosine ANN
+  (pgvector HNSW) over the tenant's utterance embeddings.
+- **Response:** `200 OK` →
+  `{"query":"…","results":[{"call_id":"<uuid>","speaker":"agent|customer","text":"…","score":0.93}, …]}`
+  where `score` is cosine similarity (`1 − distance`), highest first.
+
+> Other cabinet CRUD resources (calls, agents, scorecards, reports, settings)
+> are **planned** — see the note below.
 
 ---
 

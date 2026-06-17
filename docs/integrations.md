@@ -6,10 +6,12 @@ implementation is chosen by env; a deterministic **`fake`** implementation runs
 the whole pipeline with no paid calls in dev/tests (spec §6, §10).
 
 > Status legend: shipped today vs. **Planned (Mx)**. Real providers shipped:
-> **STT = Deepgram (M3)** via `SttClientFactory`, **LLM scoring = OpenAI (M4)** via
-> `ScoringClientFactory` (wrapped by `EvidenceValidatingScoringClient`). Embeddings
-> are still a fake (real provider planned M5). The default for every provider
-> remains `fake`, so the pipeline runs with no paid calls.
+> **STT = Deepgram (M3)**, **LLM scoring = OpenAI (M4)** (wrapped by
+> `EvidenceValidatingScoringClient`), **Embeddings = OpenAI (M5)** — each behind a
+> `*ClientFactory` selecting from its `AI_*_PROVIDER` env. Embeddings are stored in
+> the pgvector `utterance.embedding` column for tenant-scoped semantic search
+> (`POST /api/v1/search`). The default for every provider remains `fake`, so the
+> pipeline runs with no paid calls.
 
 ---
 
@@ -113,9 +115,11 @@ Defined in [`.env.example`](../.env.example) (with `EMBEDDING_DIM=1024`).
 > `SpeechToTextClient` via `SttClientFactory` from `AI_STT_PROVIDER`
 > (`fake` | `deepgram`) and `ScoringClient` via `ScoringClientFactory` from
 > `AI_LLM_PROVIDER` (`fake` | `openai`), then wraps scoring in
-> `EvidenceValidatingScoringClient`. `EmbeddingClient` is still bound to its fake
-> (selection **Planned M5**). Keys: Deepgram `DEEPGRAM_API_KEY`/`DEEPGRAM_MODEL`
-> (`nova-3`); OpenAI `OPENAI_API_KEY`/`OPENAI_LLM_MODEL` (`gpt-4o-mini`).
+> `EvidenceValidatingScoringClient`; and `EmbeddingClient` via `EmbeddingClientFactory`
+> from `AI_EMBEDDINGS_PROVIDER` (`fake` | `openai`). Keys: Deepgram
+> `DEEPGRAM_API_KEY`/`DEEPGRAM_MODEL` (`nova-3`); OpenAI `OPENAI_API_KEY`,
+> `OPENAI_LLM_MODEL` (`gpt-4o-mini`), `OPENAI_EMBEDDING_MODEL` (`text-embedding-3-large`),
+> `EMBEDDING_DIM` (1024).
 >
 > **Scoring (M4):** `OpenAiScoring` calls Chat Completions at **temperature 0** with
 > a **strict JSON schema** ([`ScoringPromptBuilder`](../apps/api/src/Infrastructure/Provider/OpenAi/ScoringPromptBuilder.php)),
@@ -151,7 +155,7 @@ implements `ObjectStorage` over a Flysystem `FilesystemOperator`. The
 |---|---|---|---|---|
 | STT | Deepgram | AssemblyAI, Gladia | `AI_STT_PROVIDER` | ✅ Deepgram shipped (M3); AssemblyAI/Gladia planned |
 | LLM scoring | OpenAI (gpt-4o-mini default) | Google Gemini, Anthropic | `AI_LLM_PROVIDER` | ✅ OpenAI shipped (M4) + evidence validation; Gemini/Anthropic planned |
-| Embeddings | OpenAI embeddings | Voyage | `AI_EMBEDDINGS_PROVIDER` | Planned (M5) — fake today |
+| Embeddings | OpenAI (text-embedding-3-large, dims=1024) | Voyage | `AI_EMBEDDINGS_PROVIDER` | ✅ OpenAI shipped (M5) + pgvector storage & search; Voyage planned |
 | Object storage | Hetzner Object Storage (S3) | MinIO (dev) | `S3_*` | ✅ shipped (storage port + Flysystem) |
 
 ---

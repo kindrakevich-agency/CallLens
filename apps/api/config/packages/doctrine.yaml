@@ -6,6 +6,8 @@ doctrine:
         types:
             # symfony/uid UUIDs stored as native Postgres uuid columns.
             uuid: Symfony\Bridge\Doctrine\Types\UuidType
+            # pgvector embeddings (utterance.embedding).
+            vector: Pgvector\Doctrine\VectorType
     orm:
         validate_xml_mapping: true
         naming_strategy: doctrine.orm.naming_strategy.underscore
@@ -18,6 +20,10 @@ doctrine:
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
         auto_mapping: true
+        dql:
+            numeric_functions:
+                # pgvector cosine distance operator (<=>) for ANN search.
+                cosine_distance: Pgvector\Doctrine\CosineDistance
         mappings:
             App:
                 type: attribute

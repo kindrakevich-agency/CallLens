@@ -290,16 +290,18 @@ Notes on the diagram:
   - `startMs` — `int` (column `start_ms`)
   - `endMs` — `int` (column `end_ms`)
   - `text` — `text`
-  - `embeddedAt` — `datetime_immutable`, nullable (column `embedded_at`); marker
-    set by `markEmbedded()`
+  - `embedding` — **`vector(1024)`** (pgvector, type `vector`, nullable), set by
+    `setEmbedding(float[])`. Indexed with **HNSW** (`vector_cosine_ops`) for
+    cosine ANN search. (M5)
+  - `embeddedAt` — `datetime_immutable`, nullable (column `embedded_at`); set when
+    the embedding is stored
 - **`Speaker` enum** (`string`-backed) — who is speaking (scoring grounds only on
   the agent's turns):
   - `Agent = 'agent'`
   - `Customer = 'customer'`
-- **Planned (M5):** an `embedding` **`vector(1024)`** column (pgvector) for
-  tenant-scoped semantic search. It is **not yet present** in the entity — the
-  code currently carries only the `embedded_at` marker as a placeholder for when
-  embeddings land.
+- Tenant-scoped semantic search runs cosine ANN over this column
+  (`UtteranceRepository::semanticSearch`, `POST /api/v1/search`); the `vector`
+  Doctrine type + `cosine_distance` DQL come from `pgvector/pgvector`.
 - **Relationships:** belongs to one `Call` and (denormalized) one `Tenant`.
 
 ## CallScore

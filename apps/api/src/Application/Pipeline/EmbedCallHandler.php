@@ -12,10 +12,9 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * Final stage: embed the call's utterances, then complete the call. (Vectors are
- * persisted to the pgvector column from M5; for now embedding just marks each
- * utterance embedded so the pipeline reaches `completed`.) Audio-retention
- * deletion is wired in M8.
+ * Final stage: embed the call's utterances (vectors stored in the pgvector
+ * `embedding` column for tenant-scoped semantic search), then complete the call.
+ * Audio-retention deletion is wired in M8.
  */
 #[AsMessageHandler]
 final class EmbedCallHandler
@@ -36,13 +35,15 @@ final class EmbedCallHandler
         }
 
         $this->step->run($call, 'embed', 'start_embedding', 'complete', function () use ($call) {
-            $utterances = $this->utterances->findForCall($call);
+            $utterances = array_values($this->utterances->findForCall($call));
             $texts = array_map(static fn ($u) => $u->text(), $utterances);
 
             if ($texts !== []) {
-                $this->embedding->embed($texts); // vectors stored on utterances in M5
-                foreach ($utterances as $utterance) {
-                    $utterance->markEmbedded();
+                $vectors = $this->embedding->embed($texts);
+                foreach ($utterances as $i => $utterance) {
+                    if (isset($vectors[$i])) {
+                        $utterance->setEmbedding($vectors[$i]);
+                    }
                 }
             }
         });

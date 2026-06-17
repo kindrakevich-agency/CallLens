@@ -46,5 +46,6 @@ services:
         arguments:
             $inner: '@scoring.inner_client'
 
-    # Embeddings still fake — real selection lands in M5.
-    App\Application\Provider\EmbeddingClient: '@App\Infrastructure\Provider\Fake\FakeEmbedding'
+    # Embeddings selected from AI_EMBEDDINGS_PROVIDER (fake | openai).
+    App\Application\Provider\EmbeddingClient:
+        factory: ['@App\Infrastructure\Provider\EmbeddingClientFactory', 'create']

@@ -9,6 +9,7 @@ use App\Domain\Tenant\TenantOwned;
 use App\Infrastructure\Doctrine\Repository\UtteranceRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Pgvector\Vector;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -45,6 +46,10 @@ class Utterance implements TenantOwned
     #[ORM\Column(type: Types::TEXT)]
     private string $text;
 
+    /** Multilingual embedding for tenant-scoped semantic search (HNSW, cosine). */
+    #[ORM\Column(type: 'vector', length: 1024, nullable: true)]
+    private ?Vector $embedding = null;
+
     #[ORM\Column(name: 'embedded_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $embeddedAt = null;
 
@@ -64,6 +69,11 @@ class Utterance implements TenantOwned
         return $this->id;
     }
 
+    public function call(): Call
+    {
+        return $this->call;
+    }
+
     public function tenant(): Tenant
     {
         return $this->tenant;
@@ -79,8 +89,20 @@ class Utterance implements TenantOwned
         return $this->text;
     }
 
-    public function markEmbedded(): void
+    /** @param float[] $vector */
+    public function setEmbedding(array $vector): void
     {
+        $this->embedding = new Vector($vector);
         $this->embeddedAt = new \DateTimeImmutable();
+    }
+
+    public function embedding(): ?Vector
+    {
+        return $this->embedding;
+    }
+
+    public function isEmbedded(): bool
+    {
+        return $this->embedding !== null;
     }
 }
