@@ -1,0 +1,8 @@
+# Normalize line endings
+* text=auto eol=lf
+
+# Treat screenshots as binary
+*.png binary
+
+# Mark generated/vendored prototype assets so GitHub language stats ignore them
+doc/html/*.html linguist-documentation
