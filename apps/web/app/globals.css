@@ -1,26 +1,39 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* CallLens brand tokens (from doc/html/branding.html): deep-navy + teal,
+   amber = "external API". Exposed as Tailwind utilities via @theme. */
+@theme {
+  --color-ink: #0c1b2a;
+  --color-ink-800: #0a1622;
+  --color-ink-700: #10314a;
+  --color-ink-600: #1b4763;
+
+  --color-brand-50: #e6f2f0;
+  --color-brand-100: #cde6e2;
+  --color-brand-300: #5eead4;
+  --color-brand-500: #0f766e;
+  --color-brand-600: #0e6a63;
+  --color-brand-700: #0b5a54;
+  --color-brand-800: #083f3b;
+
+  --color-api-50: #fef3e2;
+  --color-api-300: #fbbf24;
+  --color-api-600: #b45309;
+  --color-api-700: #92400e;
+
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  background: #f1f5f9; /* slate-100 */
+  color: #0c1b2a;
+  -webkit-font-smoothing: antialiased;
 }

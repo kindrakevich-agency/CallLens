@@ -84,6 +84,11 @@ class Utterance implements TenantOwned
         return $this->speaker;
     }
 
+    public function startMs(): int
+    {
+        return $this->startMs;
+    }
+
     public function text(): string
     {
         return $this->text;

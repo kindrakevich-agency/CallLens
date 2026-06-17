@@ -65,4 +65,19 @@ class CriterionScore
     {
         return $this->score;
     }
+
+    public function maxScore(): int
+    {
+        return $this->maxScore;
+    }
+
+    public function evidenceQuote(): ?string
+    {
+        return $this->evidenceQuote;
+    }
+
+    public function rationale(): ?string
+    {
+        return $this->rationale;
+    }
 }

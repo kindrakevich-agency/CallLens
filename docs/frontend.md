@@ -4,21 +4,35 @@ The web frontend lives in `apps/web` and is a single **Next.js 16 (App Router)**
 application built with **React 19** and **Tailwind CSS v4**. TypeScript is in
 strict mode.
 
-> **Status:** the app is scaffolding today. All three route areas exist as
-> placeholder pages; the full landing/branding port and MDX docs site are
-> **Planned (M9)** and the cabinet feature set is **Planned (M6+)**. Implemented
-> pieces are called out explicitly below.
+> **Status:** the **cabinet is built (M6)** — login, calls list/detail, semantic
+> search, agents, scorecards and settings, talking to the API with cookie auth
+> over CORS. The marketing landing and MDX docs site are still placeholders
+> (**Planned M9**); a full scorecard editor and richer settings are refinements.
 
 ```
 apps/web/
 ├─ app/
-│  ├─ layout.tsx          # root layout (fonts, <html>/<body>)
-│  ├─ globals.css         # Tailwind v4 entry
-│  ├─ (marketing)/page.tsx   # "/"      — marketing landing (placeholder)
-│  ├─ docs/page.tsx          # "/docs"  — documentation site (placeholder)
-│  └─ app/page.tsx           # "/app"   — authenticated cabinet (placeholder)
-└─ package.json           # next 16.2.9, react 19.2.4, tailwindcss ^4
+│  ├─ layout.tsx              # root layout — brand fonts (Space Grotesk/Inter/IBM Plex Mono)
+│  ├─ globals.css             # Tailwind v4 + @theme brand tokens (ink/brand/api)
+│  ├─ (marketing)/page.tsx    # "/"       — marketing landing (placeholder)
+│  ├─ docs/page.tsx           # "/docs"   — documentation site (placeholder)
+│  ├─ login/page.tsx          # "/login"  — sign in / create workspace
+│  └─ app/                    # "/app/*"  — authenticated cabinet (M6)
+│     ├─ layout.tsx           #   AuthProvider + guard + sidebar shell
+│     ├─ calls/page.tsx       #   calls list (status filter)
+│     ├─ calls/[id]/page.tsx  #   call detail: transcript + per-criterion scores + evidence
+│     ├─ search/page.tsx      #   semantic search
+│     ├─ agents/page.tsx      #   agents
+│     ├─ scorecards/page.tsx  #   scorecards (read)
+│     └─ settings/page.tsx    #   webhook endpoints + retention
+├─ lib/    api.ts (fetch client, credentials), auth.tsx (AuthProvider/useAuth)
+├─ components/  Sidebar, Brand (Logo/Wave/ScoreBadge/StatusBadge), PageHeader
+└─ package.json               # next 16.2.9, react 19.2.4, tailwindcss ^4
 ```
+
+The browser calls the API at `NEXT_PUBLIC_API_URL` (`:8081`) with
+`credentials: "include"`; the API enables CORS-with-credentials for the SPA
+origin (`CORS_ALLOW_ORIGIN`). Auth uses the JWT cookie set by `/auth/login`.
 
 `next dev` / `next build` / `next start` via npm scripts. There are no frontend
 tests yet — Vitest (component) and Playwright (e2e) arrive in M6 (`npm test` is
@@ -38,18 +52,16 @@ One app, three areas (spec §13):
    manual upload), *What reports are* (metrics, Cube), *Cabinet guide*,
    *Security*, *API reference* (public subset), searchable. *Implemented:* a
    placeholder page only. The MDX pipeline and content are **Planned (M9).**
-3. **Cabinet (`/app`, authenticated)** — the product workspace. *Implemented:* a
-   placeholder page only. Auth & tenancy land in M1; the feature set is
-   **Planned (M6+):**
-   - Calls list (filters: agent, date, score, status) with semantic search.
+3. **Cabinet (`/app`, authenticated)** — the product workspace. **Implemented (M6):**
+   - Calls list (status filter) with links to detail.
    - Call detail: speaker-separated transcript, per-criterion scores with
-     evidence quotes, overall score, audio player (or an "audio deleted" state).
-   - Agents management.
-   - Scorecard editor (criteria, weights, guidance; versioned).
-   - Analytics dashboards (Cube): avg score per agent, trend over time, top
-     objections, score distribution.
-   - Settings: integrations/webhook (URL + signing secret, regenerate), audio
-     retention policy, team & roles, profile.
+     evidence quotes + rationale, overall score, "audio deleted" state.
+   - Semantic search over utterances.
+   - Agents list; scorecards (read).
+   - Settings: webhook endpoint URL + signing secret (regenerate/add) and the
+     audio-retention policy.
+   - *Refinements (later):* analytics dashboards (Cube, M7), a full scorecard
+     editor, team & roles management, audio playback.
 
 Accessibility (keyboard, focus states, reduced motion), mobile-flawless
 responsiveness, and TypeScript strict mode are baseline requirements for all
@@ -58,12 +70,12 @@ three areas.
 ## Design system
 
 The design language is defined in `doc/html/branding.html` (interactive brand
-guide) and `doc/html/landing.html` (reference landing). These are the source of
-truth until the tokens are ported into Tailwind theme config in M9.
+guide) and `doc/html/landing.html` (reference landing).
 
-> **Note:** the current `app/layout.tsx` still ships the default `create-next-app`
-> Geist fonts and metadata. Swapping in the brand fonts and tokens below is part
-> of the M9 port.
+> **Status:** the brand tokens are now in the app — `app/globals.css` defines the
+> Ink/Teal/Amber palette via Tailwind v4 `@theme` (so `bg-ink`, `text-brand-600`,
+> etc. work), and `app/layout.tsx` loads Space Grotesk / Inter / IBM Plex Mono.
+> The full landing/branding port is still M9.
 
 ### Colors
 
@@ -109,9 +121,15 @@ recolor it off-brand, or place it on busy backgrounds.
 
 | Area | Status |
 | --- | --- |
-| App scaffold, three placeholder routes, brand palette on landing | Implemented |
-| Tailwind theme tokens, brand fonts in `layout.tsx` | Planned (M9) |
-| Full landing/branding port from `doc/html/` | Planned (M9) |
-| MDX docs site | Planned (M9) |
-| Cabinet: calls list/detail, scorecard editor, agents, search, analytics | Planned (M6+) |
-| Vitest + Playwright | Planned (M6) |
+| App scaffold + Tailwind v4 `@theme` brand tokens + brand fonts | ✅ Implemented |
+| Cabinet: login, calls list/detail, semantic search, agents, scorecards, settings | ✅ Implemented (M6) |
+| Cabinet analytics dashboards (Cube) | Planned (M7) |
+| Full scorecard editor, team & roles, audio playback | Planned (later) |
+| Full landing/branding port from `doc/html/` + MDX docs site | Planned (M9) |
+| Vitest + Playwright frontend tests | Planned |
+
+## Cabinet screenshots (M6)
+
+| Calls | Call detail | Semantic search |
+|---|---|---|
+| ![Calls](images/cabinet-calls.png) | ![Detail](images/cabinet-call-detail.png) | ![Search](images/cabinet-search.png) |
