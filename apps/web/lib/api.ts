@@ -1,10 +1,9 @@
-// Browser → CallLens API client. Cookies (auth) are sent cross-origin via
-// credentials: "include" (the API enables CORS with credentials for this origin).
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8081";
-
+// Browser → CallLens API client. Requests are same-origin (the Next app proxies
+// /api and /auth to the backend — see next.config.ts), so the auth cookie is
+// first-party and works in every browser. `credentials: "same-origin"` suffices.
 async function req(path: string, opts: RequestInit = {}): Promise<Response> {
-  return fetch(`${API_URL}${path}`, {
-    credentials: "include",
+  return fetch(path, {
+    credentials: "same-origin",
     ...opts,
   });
 }

@@ -32,9 +32,11 @@ apps/web/
 └─ package.json               # next 16.2.9, react 19.2.4, tailwindcss ^4
 ```
 
-The browser calls the API at `NEXT_PUBLIC_API_URL` (`:8081`) with
-`credentials: "include"`; the API enables CORS-with-credentials for the SPA
-origin (`CORS_ALLOW_ORIGIN`). Auth uses the JWT cookie set by `/auth/login`.
+Auth is **same-origin**: the browser only talks to the web app, which proxies
+`/api/*` and `/auth/*` to the backend (`next.config.ts` rewrites → `API_PROXY_TARGET`,
+the `nginx` service). So the JWT cookie set by `/auth/login` is **first-party** and
+works in every browser (no cross-origin/third-party-cookie issues). The API also
+keeps CORS-with-credentials (`CORS_ALLOW_ORIGIN`) for direct access.
 
 `next dev` / `next build` / `next start` via npm scripts. Flows are verified with
 Playwright during development (login → cabinet, landing, docs); a committed
