@@ -363,3 +363,43 @@ explicit about what is and isn't enforced today.
   `GOOGLE_OAUTH_CLIENT_ID/SECRET`, cookie domain/flags and storage credentials
   must come from the environment / Symfony Secrets vault — **never committed**.
   A documented rotation procedure is part of the spec.
+
+---
+
+## Hardening & security checklist (M10)
+
+Implemented:
+
+- **Network exposure** — only Nginx (API) and the web app publish ports; Postgres,
+  Redis, Cube, MinIO and PHP-FPM are reachable on the Docker network only
+  (`docker-compose.yml`). In prod only 80/443 are open and data-service ports bind
+  to loopback (`docker-compose.prod.yml`).
+- **Security headers** — `SecurityHeadersListener` adds `X-Content-Type-Options`,
+  `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`,
+  `Cross-Origin-Opener-Policy`, a strict CSP on API payloads
+  (`default-src 'none'`), and HSTS over HTTPS. The Next app sets the same headers
+  plus a page CSP via `next.config.ts`. The ReDoc page ships its own CSP.
+- **CSRF** — JWT in a SameSite=Lax cookie (primary defense) **plus**
+  `CsrfOriginListener`, which rejects unsafe (POST/PUT/PATCH/DELETE) *cookie-
+  authenticated* requests whose `Origin`/`Referer` is not allow-listed.
+- **CORS** — credentialed cross-origin limited to the SPA origin
+  (`CORS_ALLOW_ORIGIN`) on `^/(api|auth|v1)/` only.
+- **Authn/Z** — argon2id (sodium), JWT-in-cookie, rotating single-use refresh,
+  voters, Doctrine tenant filter; auth endpoints are rate-limited.
+- **Webhook trust** — HMAC-SHA256 over `timestamp + "." + rawBody`, 300s replay
+  window, idempotency by `call_id`.
+- **Secrets** — never committed; injected via env / Symfony secrets vault (a
+  leaked dev `APP_SECRET` was purged from history and remediated).
+- **Supply chain** — pinned `package-lock.json` + `composer.lock`; CI
+  (`.github/workflows/ci.yml`) runs `composer audit` and `npm audit` on every
+  push/PR alongside tests, typecheck, lint and build. Both audits are currently
+  **clean** (a transitive `postcss` advisory was resolved via an npm override).
+
+Planned (refinements / later milestones):
+
+- Nonce-based strict CSP for the web app (drop `unsafe-inline`/`unsafe-eval`).
+- `trusted_proxies` for correct HTTPS detection behind aaPanel (M11 deploy).
+- Comprehensive DTO validation (Symfony Validator) on every write endpoint.
+- Postgres Row-Level Security as defense in depth; SSH key-only + fail2ban,
+  TLS via Let's Encrypt, encrypted volumes (M11 infra).
+- A formal pen-test pass and dependency review (Dependabot).

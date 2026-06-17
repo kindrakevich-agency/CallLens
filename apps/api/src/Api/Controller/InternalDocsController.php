@@ -55,6 +55,12 @@ final class InternalDocsController
             </html>
             HTML;
 
-        return new Response($html, Response::HTTP_OK, ['Content-Type' => 'text/html']);
+        return new Response($html, Response::HTTP_OK, [
+            'Content-Type' => 'text/html',
+            // ReDoc loads its bundle from a CDN and inits inline / uses web workers.
+            'Content-Security-Policy' => "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.redoc.ly; "
+                . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
+                . "img-src 'self' data: blob:; worker-src blob:; connect-src 'self'",
+        ]);
     }
 }

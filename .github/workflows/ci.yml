@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  web:
+    name: Web (lint, audit, typecheck, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8081
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  api:
+    name: API (audit, tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Seed .env
+        run: cp .env.example .env
+      - name: Build API image
+        run: docker compose build api
+      - name: Start data services
+        run: docker compose up -d db redis minio minio-setup
+      - name: Wait for Postgres
+        run: |
+          for i in $(seq 1 30); do
+            [ "$(docker inspect --format '{{.State.Health.Status}}' "$(docker compose ps -q db)")" = "healthy" ] && break
+            sleep 2
+          done
+      - name: Install dependencies
+        run: docker compose run --rm --no-deps api composer install --no-interaction --no-progress
+      - name: Dependency audit
+        run: docker compose run --rm --no-deps api composer audit
+      - name: Prepare test database
+        run: |
+          docker compose run --rm -e APP_ENV=test api php bin/console doctrine:database:create --if-not-exists --no-interaction
+          docker compose run --rm -e APP_ENV=test api php bin/console doctrine:migrations:migrate --no-interaction
+      - name: PHPUnit
+        run: docker compose run --rm -e APP_ENV=test api php bin/phpunit

@@ -14,11 +14,14 @@ export default function CallsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setData(null);
+    let active = true;
     api
       .calls({ status: status || undefined })
-      .then(setData)
-      .catch((e) => setError(String(e.message ?? e)));
+      .then((d) => active && setData(d))
+      .catch((e) => active && setError(String(e.message ?? e)));
+    return () => {
+      active = false;
+    };
   }, [status]);
 
   return (
