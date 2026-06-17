@@ -46,12 +46,14 @@ security:
             refresh_jwt:
                 check_path: /auth/refresh
 
-        # Everything else: authenticate via the JWT cookie.
+        # Everything else: JWT cookie, plus the Google OAuth callback.
         main:
             pattern: ^/
             stateless: true
             provider: app_users
             jwt: ~
+            custom_authenticators:
+                - App\Security\GoogleAuthenticator
 
     access_control:
         - { path: ^/internal/health$, roles: PUBLIC_ACCESS }
