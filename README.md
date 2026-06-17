@@ -8,6 +8,24 @@
 
 ---
 
+## Design & HTML Prototypes
+
+Two static HTML prototypes establish the product's visual language before the Next.js app is built. They live under [`doc/html/`](doc/html/) and full-page screenshots are in [`doc/images/`](doc/images/). These are **design references**, not the production frontend.
+
+### Landing page — [`doc/html/landing.html`](doc/html/landing.html)
+
+The corporate marketing page (in Ukrainian). It explains the product to a sales-team audience: a four-step onboarding, an end-to-end "journey of a call through the system" architecture diagram, the *why API and not your own GPU* cost argument, the *sound → text → score* transformation, Cube analytics built on PostgreSQL, what "registering a webhook" means, the single-dedicated-server rationale, the tech stack, and a sign-up CTA. Self-contained single file styled with Tailwind (CDN); deep-navy + teal palette with amber accents and an animated waveform motif.
+
+[![Landing page screenshot](doc/images/landing.png)](doc/html/landing.html)
+
+### Brand guideline — [`doc/html/branding.html`](doc/html/branding.html)
+
+The brand guideline / style guide (in Ukrainian): the **CallLens** wordmark and waveform logomark with usage do/don'ts, the full color system (Ink navy, Brand teal, **Amber = "external API"**, neutral grays — all with hex values), the type scale (Space Grotesk display, Inter body, IBM Plex Mono code), and tone-of-voice / system-language rules. It is rendered by a small custom-element runtime, [`doc/html/support.js`](doc/html/support.js) (referenced via `./support.js`, which bootstraps React from a CDN) — keep the two files together so the relative reference resolves.
+
+[![Brand guideline screenshot](doc/images/branding.png)](doc/html/branding.html)
+
+---
+
 ## 1. Goals & Principles
 
 1. **API‑first AI.** All heavy AI work (speech‑to‑text, LLM scoring, embeddings) runs through external HTTP APIs. **No GPU is required.** This keeps a single dedicated server sufficient and infra cheap.

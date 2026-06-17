@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  @keyframes wv { 0%,100% { transform: scaleY(.25); } 50% { transform: scaleY(1); } }
+  @media (prefers-reduced-motion: reduce) { .wv-bar { animation: none !important; transform: scaleY(.6); } }
+</style>
+</helmet>
+
+<div style="background:#EEF2F6; font-family:'Inter',ui-sans-serif,system-ui,sans-serif; color:#0C1B2A; -webkit-font-smoothing:antialiased;">
+
+  <!-- ============ COVER ============ -->
+  <section style="position:relative; overflow:hidden; background:#0C1B2A; color:#fff; padding:72px 40px 64px;">
+    <div style="position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px); background-size:22px 22px; opacity:.7;" aria-hidden="true"></div>
+    <div style="position:absolute; top:-120px; right:-120px; width:460px; height:460px; border-radius:9999px; background:rgba(14,106,99,.22); filter:blur(80px);" aria-hidden="true"></div>
+    <div style="position:relative; max-width:1080px; margin:0 auto;">
+      <div style="display:flex; align-items:center; gap:14px; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:rgba(205,230,226,.75);">
+        <span>Гайдлайн бренду</span>
+        <span style="width:5px; height:5px; border-radius:9999px; background:#5EEAD4;"></span>
+        <span>v1.0 · Червень 2026</span>
+      </div>
+
+      <div style="margin-top:48px; display:flex; align-items:flex-end; gap:22px;">
+        <span style="display:flex; align-items:flex-end; gap:6px; color:#5EEAD4; height:64px;" aria-hidden="true">
+          <i class="wv-bar" style="width:7px; height:20px; border-radius:4px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:0s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:7px; height:52px; border-radius:4px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.12s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:7px; height:34px; border-radius:4px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.24s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:7px; height:62px; border-radius:4px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.36s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:7px; height:28px; border-radius:4px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.48s; transform-origin:bottom;"></i>
+        </span>
+        <span style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:76px; line-height:.9; letter-spacing:-.03em;">CallLens</span>
+      </div>
+
+      <p style="margin:36px 0 0; max-width:620px; font-size:19px; line-height:1.6; color:#CBD5E1;">
+        Платформа аналітики дзвінків відділу продажів. Цей документ фіксує візуальну мову бренду — логотип, кольори, шрифти та фірмові елементи.
+      </p>
+
+      <div style="margin-top:44px; display:flex; flex-wrap:wrap; gap:10px; font-family:'IBM Plex Mono',monospace; font-size:12px;">
+        <span style="display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid rgba(255,255,255,.16); border-radius:9999px; color:#E2E8F0;"><span style="width:10px; height:10px; border-radius:3px; background:#0C1B2A; border:1px solid rgba(255,255,255,.3);"></span>Ink</span>
+        <span style="display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid rgba(255,255,255,.16); border-radius:9999px; color:#E2E8F0;"><span style="width:10px; height:10px; border-radius:3px; background:#0F766E;"></span>Teal</span>
+        <span style="display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid rgba(255,255,255,.16); border-radius:9999px; color:#E2E8F0;"><span style="width:10px; height:10px; border-radius:3px; background:#FBBF24;"></span>Amber</span>
+        <span style="display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid rgba(255,255,255,.16); border-radius:9999px; color:#E2E8F0;">Space Grotesk · Inter · IBM Plex Mono</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 01 LOGO ============ -->
+  <section style="max-width:1080px; margin:0 auto; padding:88px 40px 0;">
+    <div style="display:flex; align-items:baseline; gap:16px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#0F766E; font-weight:500;">01</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:#0F766E; font-weight:500;">Логотип</span>
+    </div>
+    <h2 style="margin:14px 0 0; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:38px; letter-spacing:-.02em;">Знак — звукова хвиля</h2>
+    <p style="margin:14px 0 0; max-width:660px; font-size:16px; line-height:1.65; color:#475569;">
+      Логотип складається зі знака — анімованої звукової хвилі — та словесного знака <strong style="color:#0C1B2A;">CallLens</strong>, набраного Space Grotesk Bold. Хвиля символізує живий дзвінок, що перетворюється на дані.
+    </p>
+
+    <div style="margin-top:36px; display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+      <!-- on light -->
+      <div style="border:1px solid #E2E8F0; border-radius:18px; overflow:hidden; background:#fff;">
+        <div style="height:200px; display:grid; place-items:center; background:#fff;">
+          <div style="display:flex; align-items:flex-end; gap:14px;">
+            <span style="display:flex; align-items:flex-end; gap:4px; color:#0F766E; height:34px;" aria-hidden="true">
+              <i class="wv-bar" style="width:4px; height:12px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; transform-origin:bottom;"></i>
+              <i class="wv-bar" style="width:4px; height:28px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.12s; transform-origin:bottom;"></i>
+              <i class="wv-bar" style="width:4px; height:18px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.24s; transform-origin:bottom;"></i>
+              <i class="wv-bar" style="width:4px; height:32px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.36s; transform-origin:bottom;"></i>
+              <i class="wv-bar" style="width:4px; height:14px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.48s; transform-origin:bottom;"></i>
+            </span>
+            <span style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:34px; letter-spacing:-.02em; color:#0C1B2A;">CallLens</span>
+          </div>
+        </div>
+        <div style="padding:12px 18px; border-top:1px solid #E2E8F0; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#64748B; display:flex; justify-content:space-between;"><span>Основний · на світлому</span><span>Ink #0C1B2A · Teal #0F766E</span></div>
+      </div>
+
+      <!-- on dark -->
+      <div style="border:1px solid #E2E8F0; border-radius:18px; overflow:hidden; background:#fff;">
+        <div style="height:200px; display:grid; place-items:center; background:#0C1B2A; position:relative;">
+          <div style="position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px); background-size:20px 20px;" aria-hidden="true"></div>
+          <div style="position:relative; display:flex; align-items:flex-end; gap:14px;">
+            <span style="display:flex; align-items:flex-end; gap:4px; color:#5EEAD4; height:34px;" aria-hidden="true">
+              <i class="wv-bar" style="width:4px; height:12px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; transform-origin:bottom;"></i>
+              <i class="wv-bar" style="width:4px; height:28px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.12s; transform-origin:bottom;"></i>
+              <i class="wv-bar" style="width:4px; height:18px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.24s; transform-origin:bottom;"></i>
+              <i class="wv-bar" style="width:4px; height:32px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.36s; transform-origin:bottom;"></i>
+              <i class="wv-bar" style="width:4px; height:14px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.48s; transform-origin:bottom;"></i>
+            </span>
+            <span style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:34px; letter-spacing:-.02em; color:#fff;">CallLens</span>
+          </div>
+        </div>
+        <div style="padding:12px 18px; border-top:1px solid #E2E8F0; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#64748B; display:flex; justify-content:space-between;"><span>Інверсія · на темному</span><span>White · Teal #5EEAD4</span></div>
+      </div>
+    </div>
+
+    <!-- mark + clear space + don'ts -->
+    <div style="margin-top:24px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px;">
+      <div style="border:1px solid #E2E8F0; border-radius:18px; background:#fff; padding:24px;">
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#94A3B8;">Тільки знак</div>
+        <div style="margin-top:18px; height:96px; display:grid; place-items:center; background:#F8FAFC; border:1px solid #EEF2F6; border-radius:12px;">
+          <span style="display:flex; align-items:flex-end; gap:5px; color:#0F766E; height:44px;" aria-hidden="true">
+            <i class="wv-bar" style="width:6px; height:16px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; transform-origin:bottom;"></i>
+            <i class="wv-bar" style="width:6px; height:38px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.12s; transform-origin:bottom;"></i>
+            <i class="wv-bar" style="width:6px; height:24px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.24s; transform-origin:bottom;"></i>
+            <i class="wv-bar" style="width:6px; height:44px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.36s; transform-origin:bottom;"></i>
+            <i class="wv-bar" style="width:6px; height:20px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.48s; transform-origin:bottom;"></i>
+          </span>
+        </div>
+        <p style="margin:14px 0 0; font-size:13px; line-height:1.55; color:#64748B;">Для аватарів, фавікона та компактних місць. 5 смужок — канонічна форма.</p>
+      </div>
+
+      <div style="border:1px solid #E2E8F0; border-radius:18px; background:#fff; padding:24px;">
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#94A3B8;">Захисне поле</div>
+        <div style="margin-top:18px; height:96px; display:grid; place-items:center; background:#F8FAFC; border:1px solid #EEF2F6; border-radius:12px; position:relative;">
+          <div style="position:absolute; inset:18px; border:1px dashed #CBD5E1; border-radius:8px;"></div>
+          <span style="position:relative; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:24px; letter-spacing:-.02em; color:#0C1B2A;">CallLens</span>
+        </div>
+        <p style="margin:14px 0 0; font-size:13px; line-height:1.55; color:#64748B;">Лишайте навколо логотипа вільне поле не менше висоти знака.</p>
+      </div>
+
+      <div style="border:1px solid #E2E8F0; border-radius:18px; background:#fff; padding:24px;">
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#94A3B8;">Чого не робити</div>
+        <ul style="margin:18px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px; font-size:13.5px; color:#475569;">
+          <li style="display:flex; gap:8px;"><span style="color:#B45309;">✕</span><span>не розтягувати й не нахиляти знак</span></li>
+          <li style="display:flex; gap:8px;"><span style="color:#B45309;">✕</span><span>не змінювати кількість смужок</span></li>
+          <li style="display:flex; gap:8px;"><span style="color:#B45309;">✕</span><span>не використовувати на строкатому фоні</span></li>
+          <li style="display:flex; gap:8px;"><span style="color:#B45309;">✕</span><span>не перефарбовувати в бренд-чужі кольори</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02 COLOR ============ -->
+  <section style="max-width:1080px; margin:0 auto; padding:88px 40px 0;">
+    <div style="display:flex; align-items:baseline; gap:16px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#0F766E; font-weight:500;">02</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:#0F766E; font-weight:500;">Палітра</span>
+    </div>
+    <h2 style="margin:14px 0 0; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:38px; letter-spacing:-.02em;">Кольори бренду</h2>
+    <p style="margin:14px 0 0; max-width:660px; font-size:16px; line-height:1.65; color:#475569;">
+      Три значення несуть зміст: <strong style="color:#0C1B2A;">Ink</strong> — база й фон, <strong style="color:#0F766E;">Teal</strong> — основний бренд та дії, <strong style="color:#B45309;">Amber</strong> — маркер зовнішніх платних API. Натисніть на зразок, щоб скопіювати HEX.</p>
+
+    <!-- Ink -->
+    <div style="margin-top:34px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:17px;">Ink · база</h3>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8;">фон, текст, темні панелі</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;">
+        <div data-hex="#0C1B2A" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#fff;"><div style="height:84px; background:#0C1B2A;"></div><div style="padding:10px 12px;"><div style="font-weight:600; font-size:13px;">Ink</div><div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#64748B;">#0C1B2A</div></div></div>
+        <div data-hex="#0A1622" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#fff;"><div style="height:84px; background:#0A1622;"></div><div style="padding:10px 12px;"><div style="font-weight:600; font-size:13px;">Ink 800</div><div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#64748B;">#0A1622</div></div></div>
+        <div data-hex="#10314A" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#fff;"><div style="height:84px; background:#10314A;"></div><div style="padding:10px 12px;"><div style="font-weight:600; font-size:13px;">Ink 700</div><div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#64748B;">#10314A</div></div></div>
+        <div data-hex="#1B4763" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#fff;"><div style="height:84px; background:#1B4763;"></div><div style="padding:10px 12px;"><div style="font-weight:600; font-size:13px;">Ink 600</div><div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#64748B;">#1B4763</div></div></div>
+      </div>
+    </div>
+
+    <!-- Teal -->
+    <div style="margin-top:26px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:17px;">Teal · основний бренд</h3>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8;">кнопки, акценти, посилання</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:12px;">
+        <div data-hex="#E6F2F0" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#E6F2F0;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">50</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#E6F2F0</div></div></div>
+        <div data-hex="#CDE6E2" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#CDE6E2;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">100</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#CDE6E2</div></div></div>
+        <div data-hex="#5EEAD4" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#5EEAD4;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">300</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#5EEAD4</div></div></div>
+        <div data-hex="#0F766E" onClick="{{ copyHex }}" style="cursor:pointer; border:2px solid #0F766E; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#0F766E;"></div><div style="padding:8px 10px;"><div style="font-weight:700; font-size:11px;">500 ●</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#0F766E</div></div></div>
+        <div data-hex="#0E6A63" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#0E6A63;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">600</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#0E6A63</div></div></div>
+        <div data-hex="#0B5A54" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#0B5A54;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">700</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#0B5A54</div></div></div>
+        <div data-hex="#083F3B" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#083F3B;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">800</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#083F3B</div></div></div>
+      </div>
+    </div>
+
+    <!-- Amber -->
+    <div style="margin-top:26px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:17px;">Amber · зовнішні API</h3>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8;">семантичний маркер платних викликів</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:12px;">
+        <div data-hex="#FEF3E2" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#FEF3E2;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">50</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#FEF3E2</div></div></div>
+        <div data-hex="#FCE7C6" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#FCE7C6;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">100</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#FCE7C6</div></div></div>
+        <div data-hex="#FBBF24" onClick="{{ copyHex }}" style="cursor:pointer; border:2px solid #FBBF24; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#FBBF24;"></div><div style="padding:8px 10px;"><div style="font-weight:700; font-size:11px;">300 ●</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#FBBF24</div></div></div>
+        <div data-hex="#B45309" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#B45309;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">600</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#B45309</div></div></div>
+        <div data-hex="#92400E" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:64px; background:#92400E;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">700</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#92400E</div></div></div>
+      </div>
+    </div>
+
+    <!-- Neutrals -->
+    <div style="margin-top:26px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:17px;">Slate · нейтральні</h3>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8;">текст, рамки, поверхні, фон</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:12px;">
+        <div data-hex="#F8FAFC" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:60px; background:#F8FAFC;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">50</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#F8FAFC</div></div></div>
+        <div data-hex="#E2E8F0" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:60px; background:#E2E8F0;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">200</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#E2E8F0</div></div></div>
+        <div data-hex="#CBD5E1" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:60px; background:#CBD5E1;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">300</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#CBD5E1</div></div></div>
+        <div data-hex="#94A3B8" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:60px; background:#94A3B8;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">400</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#94A3B8</div></div></div>
+        <div data-hex="#475569" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:60px; background:#475569;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">600</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#475569</div></div></div>
+        <div data-hex="#0F172A" onClick="{{ copyHex }}" style="cursor:pointer; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; background:#fff;"><div style="height:60px; background:#0F172A;"></div><div style="padding:8px 10px;"><div style="font-weight:600; font-size:11px;">900</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#64748B;">#0F172A</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 03 TYPOGRAPHY ============ -->
+  <section style="max-width:1080px; margin:0 auto; padding:88px 40px 0;">
+    <div style="display:flex; align-items:baseline; gap:16px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#0F766E; font-weight:500;">03</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:#0F766E; font-weight:500;">Типографіка</span>
+    </div>
+    <h2 style="margin:14px 0 0; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:38px; letter-spacing:-.02em;">Три гарнітури</h2>
+    <p style="margin:14px 0 0; max-width:660px; font-size:16px; line-height:1.65; color:#475569;">Space Grotesk для заголовків, Inter для тексту, IBM Plex Mono для коду, метрик і технічних міток.</p>
+
+    <div style="margin-top:34px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px;">
+      <div style="border:1px solid #E2E8F0; border-radius:18px; background:#fff; padding:28px;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:64px; line-height:1; letter-spacing:-.03em; color:#0C1B2A;">Aa</div>
+        <div style="margin-top:18px; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:18px;">Space Grotesk</div>
+        <div style="margin-top:4px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8;">Display · 400 500 600 700</div>
+        <div style="margin-top:14px; font-family:'Space Grotesk',sans-serif; font-size:15px; color:#475569;">Заголовки, словесний знак, великі числа.</div>
+      </div>
+      <div style="border:1px solid #E2E8F0; border-radius:18px; background:#fff; padding:28px;">
+        <div style="font-family:'Inter',sans-serif; font-weight:600; font-size:64px; line-height:1; letter-spacing:-.02em; color:#0C1B2A;">Aa</div>
+        <div style="margin-top:18px; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:18px;">Inter</div>
+        <div style="margin-top:4px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8;">Текст · 400 500 600 700</div>
+        <div style="margin-top:14px; font-size:15px; color:#475569;">Основний текст, описи, інтерфейс. Підтримує кирилицю.</div>
+      </div>
+      <div style="border:1px solid #E2E8F0; border-radius:18px; background:#fff; padding:28px;">
+        <div style="font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:60px; line-height:1; color:#0F766E;">Aa</div>
+        <div style="margin-top:18px; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:18px;">IBM Plex Mono</div>
+        <div style="margin-top:4px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8;">Моно · 400 500</div>
+        <div style="margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:14px; color:#475569;">code · мітки · 202 Accepted</div>
+      </div>
+    </div>
+
+    <!-- type scale -->
+    <div style="margin-top:24px; border:1px solid #E2E8F0; border-radius:18px; background:#fff; overflow:hidden;">
+      <div style="padding:14px 28px; border-bottom:1px solid #EEF2F6; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#94A3B8;">Шкала розмірів</div>
+      <div style="padding:8px 28px 22px;">
+        <div style="display:flex; align-items:baseline; gap:20px; padding:14px 0; border-bottom:1px solid #F1F5F9;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8; width:120px; flex:none;">Display · 60</span><span style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:48px; letter-spacing:-.03em;">CallLens</span></div>
+        <div style="display:flex; align-items:baseline; gap:20px; padding:14px 0; border-bottom:1px solid #F1F5F9;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8; width:120px; flex:none;">H2 · 38</span><span style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:38px; letter-spacing:-.02em;">Кожен дзвінок — оцінений</span></div>
+        <div style="display:flex; align-items:baseline; gap:20px; padding:14px 0; border-bottom:1px solid #F1F5F9;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8; width:120px; flex:none;">H3 · 22</span><span style="font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:22px;">Підключення джерела</span></div>
+        <div style="display:flex; align-items:baseline; gap:20px; padding:14px 0; border-bottom:1px solid #F1F5F9;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8; width:120px; flex:none;">Body · 16</span><span style="font-size:16px; color:#475569;">Система розшифровує розмови й оцінює роботу менеджера.</span></div>
+        <div style="display:flex; align-items:baseline; gap:20px; padding:14px 0;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#94A3B8; width:120px; flex:none;">Mono · 12</span><span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#0F766E;">дзвінок → вебхук → оцінка → дашборд</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 MOTIFS ============ -->
+  <section style="max-width:1080px; margin:0 auto; padding:88px 40px 100px;">
+    <div style="display:flex; align-items:baseline; gap:16px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#0F766E; font-weight:500;">04</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:#0F766E; font-weight:500;">Фірмові елементи</span>
+    </div>
+    <h2 style="margin:14px 0 0; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:38px; letter-spacing:-.02em;">Мова системи</h2>
+    <p style="margin:14px 0 0; max-width:660px; font-size:16px; line-height:1.65; color:#475569;">Повторювані елементи, що роблять бренд впізнаваним: хвиля, крапкова сітка, стрілки-конвеєр і кнопки.</p>
+
+    <div style="margin-top:34px; display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+      <!-- waveform on dark -->
+      <div style="border:1px solid #E2E8F0; border-radius:18px; overflow:hidden; background:#0C1B2A; position:relative; min-height:200px; display:flex; flex-direction:column; justify-content:space-between;">
+        <div style="position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px); background-size:22px 22px;" aria-hidden="true"></div>
+        <div style="position:relative; padding:24px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:rgba(94,234,212,.8);">Звукова хвиля + крапкова сітка</span></div>
+        <div style="position:relative; padding:0 24px 30px; display:flex; align-items:flex-end; gap:5px; color:#5EEAD4; height:80px;" aria-hidden="true">
+          <i class="wv-bar" style="width:5px; height:28px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:5px; height:56px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.08s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:5px; height:36px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.16s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:5px; height:64px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.24s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:5px; height:30px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.32s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:5px; height:50px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.4s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:5px; height:22px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.48s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:5px; height:44px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.56s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:5px; height:34px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.64s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:5px; height:58px; border-radius:3px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.72s; transform-origin:bottom;"></i>
+        </div>
+      </div>
+
+      <!-- pipeline arrows + buttons -->
+      <div style="border:1px solid #E2E8F0; border-radius:18px; background:#fff; padding:24px; display:flex; flex-direction:column; gap:20px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#94A3B8;">Конвеєр · кнопки · мітки</span>
+        <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:#475569; flex-wrap:wrap;">
+          <span style="padding:6px 12px; border:1px solid #E2E8F0; border-radius:10px; background:#F8FAFC;">Звук</span>
+          <svg viewBox="0 0 24 24" style="width:18px; height:18px; color:#CBD5E1;" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <span style="padding:6px 12px; border:1px solid #E2E8F0; border-radius:10px; background:#F8FAFC;">Текст</span>
+          <svg viewBox="0 0 24 24" style="width:18px; height:18px; color:#CBD5E1;" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <span style="padding:6px 12px; border:1px solid #FCE7C6; border-radius:10px; background:#FEF3E2; color:#92400E;">API</span>
+          <svg viewBox="0 0 24 24" style="width:18px; height:18px; color:#CBD5E1;" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <span style="padding:6px 12px; border:1px solid #E2E8F0; border-radius:10px; background:#F8FAFC;">Оцінка</span>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button style="border:none; cursor:pointer; background:#0F766E; color:#fff; font-family:'Inter',sans-serif; font-weight:500; font-size:14px; padding:10px 18px; border-radius:10px;">Підключити команду</button>
+          <button style="cursor:pointer; background:#0C1B2A; color:#fff; border:none; font-family:'Inter',sans-serif; font-weight:500; font-size:14px; padding:10px 18px; border-radius:10px;">Як почати →</button>
+          <button style="cursor:pointer; background:#fff; color:#475569; border:1px solid #E2E8F0; font-family:'Inter',sans-serif; font-weight:500; font-size:14px; padding:10px 18px; border-radius:10px;">Архітектура</button>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span style="display:inline-flex; align-items:center; gap:6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#0B5A54; background:#E6F2F0; border:1px solid #CDE6E2; padding:5px 10px; border-radius:9999px;"><span style="width:7px; height:7px; border-radius:3px; background:#0F766E;"></span>бренд</span>
+          <span style="display:inline-flex; align-items:center; gap:6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#92400E; background:#FEF3E2; border:1px solid #FCE7C6; padding:5px 10px; border-radius:9999px;"><span style="width:7px; height:7px; border-radius:3px; background:#FBBF24;"></span>зовнішнє API</span>
+          <span style="display:inline-flex; align-items:center; gap:6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#fff; background:#0C1B2A; padding:5px 10px; border-radius:9999px;">202 Accepted</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer style="border-top:1px solid #E2E8F0; background:#fff;">
+    <div style="max-width:1080px; margin:0 auto; padding:28px 40px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="display:flex; align-items:flex-end; gap:3px; color:#0F766E; height:16px;" aria-hidden="true">
+          <i class="wv-bar" style="width:3px; height:7px; border-radius:2px; background:currentColor; animation:wv 1.2s ease-in-out infinite; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:3px; height:15px; border-radius:2px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.15s; transform-origin:bottom;"></i>
+          <i class="wv-bar" style="width:3px; height:10px; border-radius:2px; background:currentColor; animation:wv 1.2s ease-in-out infinite; animation-delay:.3s; transform-origin:bottom;"></i>
+        </span>
+        <span style="font-family:'Space Grotesk',sans-serif; font-weight:600; color:#0C1B2A;">CallLens</span>
+      </div>
+      <span style="font-size:13px; color:#94A3B8;">Гайдлайн бренду · аналітика дзвінків для відділів продажів</span>
+    </div>
+  </footer>
+
+  <!-- copy toast -->
+  <sc-if value="{{ copied }}" hint-placeholder-val="">
+    <div style="position:fixed; left:50%; bottom:28px; transform:translateX(-50%); background:#0C1B2A; color:#fff; font-family:'IBM Plex Mono',monospace; font-size:13px; padding:10px 18px; border-radius:9999px; box-shadow:0 12px 30px -10px rgba(12,27,42,.5); z-index:50;">Скопійовано {{ copied }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { copied: null };
+  renderVals() {
+    return {
+      copied: this.state.copied,
+      copyHex: (e) => {
+        const hex = e.currentTarget && e.currentTarget.dataset ? e.currentTarget.dataset.hex : null;
+        if (!hex) return;
+        try { navigator.clipboard && navigator.clipboard.writeText(hex); } catch (err) {}
+        this.setState({ copied: hex });
+        clearTimeout(this._t);
+        this._t = setTimeout(() => this.setState({ copied: null }), 1400);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
